@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Domain Agent — Toplu Domain Kontrol</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #06060a;
+    --card: rgba(255,255,255,0.025);
+    --border: rgba(255,255,255,0.07);
+    --text: #e2e8f0;
+    --dim: #4a5568;
+    --muted: #64748b;
+    --accent: #6366f1;
+    --accent2: #7c3aed;
+    --green: #10b981;
+    --red: #ef4444;
+    --yellow: #f59e0b;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    min-height: 100vh;
+  }
+
+  .wrap { max-width: 880px; margin: 0 auto; padding: 40px 20px; }
+
+  /* Header */
+  .header { text-align: center; margin-bottom: 36px; }
+  .header-row { display: inline-flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+  .logo {
+    width: 42px; height: 42px; border-radius: 12px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; font-weight: 800; color: #fff;
+    font-family: 'Outfit', sans-serif;
+    box-shadow: 0 4px 20px rgba(99,102,241,0.3);
+  }
+  .header h1 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 30px; font-weight: 800;
+    background: linear-gradient(135deg, #fff, #94a3b8);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .header p { color: var(--dim); font-size: 13px; font-family: 'Outfit', sans-serif; }
+
+  /* Cards */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+  }
+
+  /* Mode switch */
+  .mode-center { display: flex; justify-content: center; margin-bottom: 22px; }
+  .mode-sw {
+    display: inline-flex; background: rgba(255,255,255,0.03);
+    border-radius: 10px; padding: 3px; border: 1px solid var(--border);
+  }
+  .mode-b {
+    padding: 8px 22px; border-radius: 8px; border: none;
+    background: transparent; color: var(--dim);
+    font-family: 'Outfit', sans-serif; font-size: 13px;
+    font-weight: 500; cursor: pointer; transition: all 0.15s;
+  }
+  .mode-b.on { background: rgba(99,102,241,0.18); color: #a5b4fc; }
+
+  /* Textarea */
+  textarea {
+    background: rgba(0,0,0,0.5); border: 1px solid var(--border);
+    border-radius: 10px; color: var(--text);
+    font-family: 'JetBrains Mono', monospace; font-size: 12.5px;
+    padding: 14px; width: 100%; resize: vertical;
+    outline: none; transition: border-color 0.2s; line-height: 1.8;
+  }
+  textarea:focus { border-color: var(--accent); }
+  textarea::placeholder { color: #2a2f3d; }
+
+  /* Inputs */
+  .kinput {
+    background: rgba(0,0,0,0.5); border: 1px solid var(--border);
+    border-radius: 9px; color: var(--text);
+    font-family: 'JetBrains Mono', monospace; font-size: 13px;
+    padding: 11px 14px; flex: 1; outline: none;
+  }
+  .kinput:focus { border-color: var(--accent); }
+  .kinput::placeholder { color: #2a2f3d; }
+
+  /* Buttons */
+  .btn {
+    border: none; padding: 10px 24px; border-radius: 9px;
+    font-family: 'Outfit', sans-serif; font-weight: 600;
+    font-size: 13px; cursor: pointer; transition: all 0.15s;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-go {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #fff;
+  }
+  .btn-go:hover:not(:disabled) {
+    box-shadow: 0 6px 24px rgba(99,102,241,0.4);
+    transform: translateY(-1px);
+  }
+  .btn-stop { background: var(--red); color: #fff; }
+  .btn-dim {
+    background: rgba(255,255,255,0.05); color: var(--muted);
+    border: 1px solid var(--border); padding: 8px 14px; font-size: 12px;
+  }
+  .btn-dim:hover { background: rgba(255,255,255,0.1); color: var(--text); }
+
+  /* TLD chips */
+  .tld-row { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tld-chip {
+    padding: 5px 13px; border-radius: 18px; font-size: 11.5px;
+    font-weight: 500; cursor: pointer; transition: all 0.15s;
+    border: 1px solid var(--border); background: rgba(255,255,255,0.03);
+    color: var(--dim); user-select: none;
+  }
+  .tld-chip.on {
+    background: rgba(99,102,241,0.18);
+    border-color: rgba(99,102,241,0.4); color: #a5b4fc;
+  }
+
+  /* Filter tabs */
+  .tabs { display: flex; gap: 3px; padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.05); flex-wrap: wrap; }
+  .tab {
+    padding: 7px 15px; border-radius: 7px; font-size: 11.5px;
+    font-weight: 500; cursor: pointer; border: none;
+    background: transparent; color: var(--dim);
+    font-family: 'Outfit', sans-serif; transition: all 0.15s;
+  }
+  .tab.on { background: rgba(99,102,241,0.12); color: #a5b4fc; }
+  .tab:hover { color: #cbd5e1; }
+
+  /* Stats */
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
+  .stat-card { padding: 16px; text-align: center; }
+  .stat-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 28px; font-weight: 700; line-height: 1;
+  }
+  .stat-label {
+    font-size: 10px; color: var(--dim); margin-top: 4px;
+    font-family: 'Outfit', sans-serif; text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  /* Results */
+  .scroll-box { max-height: 500px; overflow-y: auto; }
+  .scroll-box::-webkit-scrollbar { width: 5px; }
+  .scroll-box::-webkit-scrollbar-track { background: transparent; }
+  .scroll-box::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 3px; }
+
+  .row {
+    display: flex; align-items: center; padding: 12px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.035);
+    gap: 12px; animation: fadeUp 0.2s ease;
+  }
+  .row:last-child { border-bottom: none; }
+  .row:hover { background: rgba(255,255,255,0.02); }
+
+  .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .row-domain { font-size: 12.5px; font-weight: 500; color: var(--text); }
+  .row-info {
+    font-size: 10.5px; color: var(--dim); margin-top: 2px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .badge {
+    padding: 3px 10px; border-radius: 5px; font-size: 10px;
+    font-weight: 600; font-family: 'Outfit', sans-serif;
+    white-space: nowrap; letter-spacing: 0.5px;
+  }
+
+  /* Progress */
+  .bar-track { height: 3px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden; }
+  .bar-fill {
+    height: 100%; border-radius: 3px; transition: width 0.3s;
+    background: linear-gradient(90deg, var(--accent), var(--accent2), #06b6d4);
+  }
+
+  .label { font-size: 11px; color: var(--dim); margin-bottom: 6px; font-family: 'Outfit', sans-serif; }
+  .label-sm { font-size: 10px; color: #2a2f3d; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1.2px; font-family: 'Outfit', sans-serif; }
+  .actions { display: flex; gap: 8px; margin-top: 16px; align-items: center; flex-wrap: wrap; }
+  .footer { text-align: center; margin-top: 30px; font-size: 10px; color: #1e2030; font-family: 'Outfit', sans-serif; }
+
+  .hidden { display: none; }
+
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spinner {
+    width: 10px; height: 10px; border: 2px solid var(--accent);
+    border-top-color: transparent; border-radius: 50%;
+    animation: spin 0.6s linear infinite; display: inline-block;
+  }
+
+  @media (max-width: 600px) {
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .header h1 { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <!-- Header -->
+  <div class="header">
+    <div class="header-row">
+      <div class="logo">D</div>
+      <h1>Domain Agent</h1>
+    </div>
+    <p>Toplu domain müsaitlik kontrolü — RDAP + DNS</p>
+  </div>
+
+  <!-- Mode Switch -->
+  <div class="mode-center">
+    <div class="mode-sw">
+      <button class="mode-b on" id="modeList" onclick="setMode('list')">📋 Liste</button>
+      <button class="mode-b" id="modeAI" onclick="setMode('generate')">🤖 AI Üret</button>
+    </div>
+  </div>
+
+  <!-- Input Card -->
+  <div class="card" style="padding:20px; margin-bottom:20px;">
+    <!-- AI Generate Section -->
+    <div id="aiSection" class="hidden" style="margin-bottom:16px;">
+      <div class="label">Anahtar kelime girin, AI yaratıcı domain önerileri üretsin</div>
+      <div style="display:flex; gap:8px;">
+        <input class="kinput" id="keywordInput" placeholder="örn: yapay zeka, fintech, sağlık...">
+        <button class="btn btn-go" id="generateBtn" onclick="generateDomains()">Üret</button>
+      </div>
+    </div>
+
+    <div class="label">Her satıra bir domain · TLD'siz yazarsanız seçili uzantılar eklenir</div>
+    <textarea id="domainInput" rows="7" placeholder="google.com&#10;acme-startup.com&#10;my-awesome-project.io&#10;xyznotexist12345.com&#10;blockchain-ai-saas.dev&#10;turkiye-dijital.net"></textarea>
+
+    <!-- TLD Chips -->
+    <div style="margin-top:14px;">
+      <div class="label-sm">Uzantılar (TLD'siz satırlar için)</div>
+      <div class="tld-row" id="tldRow"></div>
+    </div>
+
+    <!-- Actions -->
+    <div class="actions">
+      <button class="btn btn-go" id="startBtn" onclick="startCheck()">🔍 Kontrol Başlat</button>
+      <button class="btn btn-stop hidden" id="stopBtn" onclick="stopCheck()">⏹ Durdur</button>
+      <button class="btn btn-dim" onclick="loadSample()">Örnek Yükle</button>
+      <button class="btn btn-dim hidden" id="csvBtn" onclick="exportCSV()" style="margin-left:auto;">📥 CSV</button>
+      <button class="btn btn-dim hidden" id="copyBtn" onclick="copyAvailable()">📋 Müsaitleri Kopyala</button>
+    </div>
+
+    <!-- Progress -->
+    <div id="progressSection" class="hidden" style="margin-top:14px;">
+      <div style="display:flex; justify-content:space-between; font-size:11px; color:#4a5568; margin-bottom:5px;">
+        <span style="display:flex; align-items:center; gap:6px;">
+          <span class="spinner"></span> Kontrol ediliyor...
+        </span>
+        <span id="progressText">0 / 0</span>
+      </div>
+      <div class="bar-track"><div class="bar-fill" id="progressBar" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats hidden" id="statsSection">
+    <div class="card stat-card"><div class="stat-num" id="statAll" style="color:#6366f1">0</div><div class="stat-label">Toplam</div></div>
+    <div class="card stat-card"><div class="stat-num" id="statAvail" style="color:#10b981">0</div><div class="stat-label">Müsait</div></div>
+    <div class="card stat-card"><div class="stat-num" id="statTaken" style="color:#ef4444">0</div><div class="stat-label">Kayıtlı</div></div>
+    <div class="card stat-card"><div class="stat-num" id="statError" style="color:#f59e0b">0</div><div class="stat-label">Belirsiz</div></div>
+  </div>
+
+  <!-- Results -->
+  <div class="card hidden" id="resultsCard" style="overflow:hidden;">
+    <div class="tabs" id="filterTabs"></div>
+    <div class="scroll-box" id="resultsList"></div>
+  </div>
+
+  <div class="footer">RDAP + Google DNS + Cloudflare DNS · 3 katmanlı kontrol · Kesin bilgi için registrar sorgulayın</div>
+</div>
+
+<script>
+const TLD_OPTIONS = [".com",".net",".org",".io",".dev",".co",".app",".xyz",".ai",".tech",".me",".info"];
+let selectedTLDs = [".com"];
+let results = [];
+let currentFilter = "all";
+let aborted = false;
+let checking = false;
+
+// Init TLD chips
+const tldRow = document.getElementById("tldRow");
+TLD_OPTIONS.forEach(tld => {
+  const chip = document.createElement("span");
+  chip.className = "tld-chip" + (selectedTLDs.includes(tld) ? " on" : "");
+  chip.textContent = tld;
+  chip.onclick = () => {
+    if (selectedTLDs.includes(tld)) {
+      selectedTLDs = selectedTLDs.filter(t => t !== tld);
+      chip.classList.remove("on");
+    } else {
+      selectedTLDs.push(tld);
+      chip.classList.add("on");
+    }
+  };
+  tldRow.appendChild(chip);
+});
+
+function setMode(m) {
+  document.getElementById("modeList").className = "mode-b" + (m === "list" ? " on" : "");
+  document.getElementById("modeAI").className = "mode-b" + (m === "generate" ? " on" : "");
+  document.getElementById("aiSection").className = m === "generate" ? "" : "hidden";
+}
+
+function loadSample() {
+  document.getElementById("domainInput").value = "google.com\nacme-startup.com\nmy-awesome-project.io\nxyznotexist12345.com\nblockchain-ai-saas.dev\nturkiye-dijital.net";
+}
+
+function cleanDomain(d) {
+  return d.trim().toLowerCase().replace(/^https?:\/\//, "").replace(/^www\./, "").replace(/\/.*$/, "").replace(/\s+/g, "");
+}
+
+async function checkDomain(domain) {
+  const clean = cleanDomain(domain);
+  if (!clean || clean.length < 3 || !clean.includes(".")) {
+    return { domain: clean || domain, status: "error", info: "Geçersiz domain formatı" };
+  }
+
+  // 1) RDAP
+  try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 8000);
+    const resp = await fetch("https://rdap.org/domain/" + clean, {
+      signal: ctrl.signal,
+      headers: { "Accept": "application/rdap+json,application/json" }
+    });
+    clearTimeout(t);
+
+    if (resp.status === 404) return { domain: clean, status: "available", info: "✓ Müsait — RDAP kaydı bulunamadı" };
+    if (resp.ok) {
+      try {
+        const data = await resp.json();
+        const events = data.events || [];
+        const reg = events.find(e => e.eventAction === "registration");
+        const exp = events.find(e => e.eventAction === "expiration");
+        const ns = (data.nameservers || []).map(n => n.ldhName || "").filter(Boolean).slice(0, 2).join(", ");
+        let info = "Kayıtlı (RDAP)";
+        const p = [];
+        if (reg) p.push("Kayıt: " + new Date(reg.eventDate).toLocaleDateString("tr-TR"));
+        if (exp) p.push("Bitiş: " + new Date(exp.eventDate).toLocaleDateString("tr-TR"));
+        if (ns) p.push("NS: " + ns);
+        if (p.length) info += " · " + p.join(" · ");
+        return { domain: clean, status: "taken", info };
+      } catch { return { domain: clean, status: "taken", info: "Kayıtlı (RDAP)" }; }
+    }
+  } catch {}
+
+  // 2) Google DNS
+  try {
+    const ctrl2 = new AbortController();
+    const t2 = setTimeout(() => ctrl2.abort(), 6000);
+    const dr = await fetch("https://dns.google/resolve?name=" + encodeURIComponent(clean) + "&type=A", { signal: ctrl2.signal });
+    clearTimeout(t2);
+    if (dr.ok) {
+      const dd = await dr.json();
+      if (dd.Status === 3) return { domain: clean, status: "available", info: "✓ Muhtemelen müsait — NXDOMAIN" };
+      if (dd.Answer && dd.Answer.length > 0) {
+        const ip = (dd.Answer.find(a => a.type === 1) || {}).data || "";
+        return { domain: clean, status: "taken", info: "Kayıtlı (DNS)" + (ip ? " · IP: " + ip : "") };
+      }
+      if (dd.Authority && dd.Authority.length > 0) return { domain: clean, status: "taken", info: "Kayıtlı (NS mevcut)" };
+      if (dd.Status === 0 && !dd.Answer) return { domain: clean, status: "available", info: "✓ Muhtemelen müsait — DNS boş" };
+    }
+  } catch {}
+
+  // 3) Cloudflare DNS
+  try {
+    const ctrl3 = new AbortController();
+    const t3 = setTimeout(() => ctrl3.abort(), 5000);
+    const cr = await fetch("https://cloudflare-dns.com/dns-query?name=" + encodeURIComponent(clean) + "&type=A", {
+      signal: ctrl3.signal, headers: { "Accept": "application/dns-json" }
+    });
+    clearTimeout(t3);
+    if (cr.ok) {
+      const cd = await cr.json();
+      if (cd.Status === 3) return { domain: clean, status: "available", info: "✓ Muhtemelen müsait — NXDOMAIN (CF)" };
+      if (cd.Answer && cd.Answer.length > 0) return { domain: clean, status: "taken", info: "Kayıtlı (Cloudflare DNS)" };
+    }
+  } catch {}
+
+  return { domain: clean, status: "error", info: "Kontrol edilemedi" };
+}
+
+async function startCheck() {
+  const lines = document.getElementById("domainInput").value.split("\n").map(d => d.trim()).filter(d => d.length > 0);
+  if (!lines.length) return;
+
+  let allDomains = [];
+  lines.forEach(line => {
+    if (/\.[a-z]{2,}$/i.test(line)) {
+      allDomains.push(line);
+    } else {
+      selectedTLDs.forEach(tld => allDomains.push(line + tld));
+    }
+  });
+  allDomains = [...new Set(allDomains)];
+
+  checking = true; aborted = false; results = []; currentFilter = "all";
+  document.getElementById("startBtn").classList.add("hidden");
+  document.getElementById("stopBtn").classList.remove("hidden");
+  document.getElementById("progressSection").classList.remove("hidden");
+  document.getElementById("csvBtn").classList.add("hidden");
+  document.getElementById("copyBtn").classList.add("hidden");
+  document.getElementById("statsSection").classList.add("hidden");
+  document.getElementById("resultsCard").classList.add("hidden");
+  document.getElementById("resultsList").innerHTML = "";
+
+  const total = allDomains.length;
+  const batch = 3;
+
+  for (let i = 0; i < total; i += batch) {
+    if (aborted) break;
+    const group = allDomains.slice(i, i + batch);
+    const res = await Promise.all(group.map(checkDomain));
+    results.push(...res);
+    const done = Math.min(i + batch, total);
+    document.getElementById("progressText").textContent = done + " / " + total;
+    document.getElementById("progressBar").style.width = ((done / total) * 100) + "%";
+    renderResults();
+    if (i + batch < total && !aborted) await new Promise(r => setTimeout(r, 400));
+  }
+
+  checking = false;
+  document.getElementById("startBtn").classList.remove("hidden");
+  document.getElementById("stopBtn").classList.add("hidden");
+  document.getElementById("progressSection").classList.add("hidden");
+  if (results.length) {
+    document.getElementById("csvBtn").classList.remove("hidden");
+    if (results.some(r => r.status === "available")) document.getElementById("copyBtn").classList.remove("hidden");
+  }
+}
+
+function stopCheck() { aborted = true; }
+
+function renderResults() {
+  if (!results.length) return;
+
+  const counts = {
+    all: results.length,
+    available: results.filter(r => r.status === "available").length,
+    taken: results.filter(r => r.status === "taken").length,
+    error: results.filter(r => r.status === "error").length,
+  };
+
+  // Stats
+  document.getElementById("statsSection").classList.remove("hidden");
+  document.getElementById("statAll").textContent = counts.all;
+  document.getElementById("statAvail").textContent = counts.available;
+  document.getElementById("statTaken").textContent = counts.taken;
+  document.getElementById("statError").textContent = counts.error;
+
+  // Tabs
+  document.getElementById("resultsCard").classList.remove("hidden");
+  const tabs = document.getElementById("filterTabs");
+  tabs.innerHTML = "";
+  [
+    { key: "all", label: "Tümü " + counts.all },
+    { key: "available", label: "Müsait " + counts.available },
+    { key: "taken", label: "Kayıtlı " + counts.taken },
+    { key: "error", label: "Belirsiz " + counts.error },
+  ].forEach(f => {
+    const btn = document.createElement("button");
+    btn.className = "tab" + (currentFilter === f.key ? " on" : "");
+    btn.textContent = f.label;
+    btn.onclick = () => { currentFilter = f.key; renderResults(); };
+    tabs.appendChild(btn);
+  });
+
+  // Rows
+  const colors = {
+    available: { dot: "#10b981", bg: "#0d2818", border: "#10b981", text: "#34d399", label: "MÜSAİT" },
+    taken: { dot: "#ef4444", bg: "#2d1215", border: "#ef4444", text: "#f87171", label: "KAYITLI" },
+    error: { dot: "#f59e0b", bg: "#2d2305", border: "#f59e0b", text: "#fbbf24", label: "BELİRSİZ" },
+  };
+
+  const filtered = results.filter(r => currentFilter === "all" || r.status === currentFilter);
+  const list = document.getElementById("resultsList");
+  list.innerHTML = "";
+
+  filtered.forEach(r => {
+    const c = colors[r.status];
+    const row = document.createElement("div");
+    row.className = "row";
+    row.innerHTML = `
+      <div class="dot" style="background:${c.dot}"></div>
+      <div style="flex:1;min-width:0">
+        <div class="row-domain">${r.domain}</div>
+        <div class="row-info">${r.info}</div>
+      </div>
+      <div class="badge" style="background:${c.bg};color:${c.text};border:1px solid ${c.border}25">${c.label}</div>
+    `;
+    list.appendChild(row);
+  });
+}
+
+function exportCSV() {
+  const bom = "\uFEFF";
+  const csv = bom + "Domain,Durum,Detay\n" + results.map(r =>
+    '"' + r.domain + '","' + (r.status === "available" ? "Müsait" : r.status === "taken" ? "Kayıtlı" : "Belirsiz") + '","' + r.info.replace(/"/g, '""') + '"'
+  ).join("\n");
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = "domain-sonuclari.csv"; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function copyAvailable() {
+  const avail = results.filter(r => r.status === "available").map(r => r.domain).join("\n");
+  if (avail) navigator.clipboard.writeText(avail).then(() => {
+    const btn = document.getElementById("copyBtn");
+    btn.textContent = "✓ Kopyalandı!";
+    setTimeout(() => btn.textContent = "📋 Müsaitleri Kopyala", 1500);
+  });
+}
+
+async function generateDomains() {
+  const kw = document.getElementById("keywordInput").value.trim();
+  if (!kw) return;
+  const btn = document.getElementById("generateBtn");
+  btn.disabled = true; btn.textContent = "Üretiliyor...";
+  try {
+    const resp = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 1000,
+        messages: [{ role: "user", content: '"' + kw + '" anahtar kelimesine dayalı 20 yaratıcı, kısa domain adı öner. TLD ekleme. Her satıra bir tane. Numara/açıklama yok.' }]
+      })
+    });
+    const data = await resp.json();
+    const text = (data.content && data.content[0] && data.content[0].text) || "";
+    const names = text.split("\n").map(l => l.trim().replace(/^\d+[\.\)\-]\s*/, "").replace(/\s.*$/, "")).filter(l => l && l.length > 1);
+    if (names.length) {
+      document.getElementById("domainInput").value = names.join("\n");
+      setMode("list");
+    }
+  } catch (e) { console.error(e); }
+  btn.disabled = false; btn.textContent = "Üret";
+}
+
+// Enter key for keyword
+document.getElementById("keywordInput").addEventListener("keydown", e => { if (e.key === "Enter") generateDomains(); });
+</script>
+</body>
+</html>
