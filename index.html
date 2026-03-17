@@ -4,163 +4,196 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Domain Agent — Toplu Domain Kontrol</title>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #f8f9fc;
+    --bg: #f5f5f7;
     --card: #ffffff;
-    --border: #e2e8f0;
-    --text: #1e293b;
-    --dim: #64748b;
-    --muted: #94a3b8;
+    --border: #e5e7eb;
+    --text: #111827;
+    --dim: #6b7280;
+    --muted: #9ca3af;
     --accent: #4f46e5;
     --accent2: #7c3aed;
     --green: #059669;
     --red: #dc2626;
     --yellow: #d97706;
-    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
-    --shadow-md: 0 4px 12px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.04);
-    --shadow-lg: 0 10px 30px rgba(0,0,0,0.08);
+    --radius: 18px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.06), 0 2px 6px rgba(0,0,0,0.03);
+    --shadow-lg: 0 12px 40px rgba(0,0,0,0.08);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--text); font-family: 'Outfit', sans-serif; min-height: 100vh; }
-  .wrap { max-width: 920px; margin: 0 auto; padding: 32px 20px; }
-  .header { text-align: center; margin-bottom: 32px; }
-  .header-row { display: inline-flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; min-height: 100vh; -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 40px 24px; }
+
+  /* Header */
+  .header { text-align: center; margin-bottom: 40px; }
+  .header-row { display: inline-flex; align-items: center; gap: 14px; margin-bottom: 8px; }
   .logo {
-    width: 46px; height: 46px; border-radius: 14px;
+    width: 52px; height: 52px; border-radius: 16px;
     background: linear-gradient(135deg, var(--accent), var(--accent2));
     display: flex; align-items: center; justify-content: center;
-    font-size: 22px; font-weight: 800; color: #fff;
-    font-family: 'Outfit', sans-serif;
-    box-shadow: 0 4px 14px rgba(79,70,229,0.3);
+    font-size: 24px; font-weight: 900; color: #fff;
+    font-family: 'Inter', sans-serif;
+    box-shadow: 0 6px 20px rgba(79,70,229,0.25);
   }
   .header h1 {
-    font-family: 'Outfit', sans-serif; font-size: 30px; font-weight: 800;
-    color: var(--text);
+    font-family: 'Inter', sans-serif; font-size: 36px; font-weight: 900;
+    color: var(--text); letter-spacing: -0.5px;
   }
-  .header p { color: var(--dim); font-size: 13px; font-family: 'Outfit', sans-serif; margin-top: 2px; }
-  .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow); }
-  .mode-center { display: flex; justify-content: center; margin-bottom: 20px; }
+  .header p { color: var(--dim); font-size: 15px; font-family: 'Inter', sans-serif; margin-top: 4px; font-weight: 400; }
+
+  /* Card */
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); }
+
+  /* Mode Switch */
+  .mode-center { display: flex; justify-content: center; margin-bottom: 24px; }
   .mode-sw {
-    display: inline-flex; background: #f1f5f9;
-    border-radius: 12px; padding: 4px; border: 1px solid var(--border);
+    display: inline-flex; background: #e5e7eb;
+    border-radius: 14px; padding: 4px; border: none;
   }
   .mode-b {
-    padding: 9px 22px; border-radius: 9px; border: none;
+    padding: 10px 24px; border-radius: 11px; border: none;
     background: transparent; color: var(--dim);
-    font-family: 'Outfit', sans-serif; font-size: 13px;
+    font-family: 'Inter', sans-serif; font-size: 14px;
     font-weight: 600; cursor: pointer; transition: all 0.2s;
   }
-  .mode-b.on { background: #fff; color: var(--accent); box-shadow: var(--shadow); }
+  .mode-b.on { background: #fff; color: var(--accent); box-shadow: var(--shadow-md); }
   .mode-b:hover:not(.on) { color: var(--text); }
+
+  /* Inputs */
   textarea, .kinput {
     background: #fff; border: 1.5px solid var(--border);
-    border-radius: 10px; color: var(--text);
-    font-family: 'JetBrains Mono', monospace; font-size: 12.5px;
-    padding: 12px 14px; outline: none; transition: all 0.2s;
+    border-radius: 12px; color: var(--text);
+    font-family: 'JetBrains Mono', monospace; font-size: 14px;
+    padding: 14px 16px; outline: none; transition: all 0.2s;
   }
-  textarea { width: 100%; resize: vertical; line-height: 1.8; }
-  textarea:focus, .kinput:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(79,70,229,0.1); }
-  textarea::placeholder, .kinput::placeholder { color: #cbd5e1; }
-  .kinput { padding: 10px 12px; flex: 1; }
+  textarea { width: 100%; resize: vertical; line-height: 1.9; }
+  textarea:focus, .kinput:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(79,70,229,0.08); }
+  textarea::placeholder, .kinput::placeholder { color: #d1d5db; }
+  .kinput { padding: 12px 14px; flex: 1; }
   select {
     background: #fff; border: 1.5px solid var(--border);
-    border-radius: 8px; color: var(--text); font-family: 'Outfit', sans-serif;
-    font-size: 12px; padding: 8px 10px; outline: none; cursor: pointer;
+    border-radius: 10px; color: var(--text); font-family: 'Inter', sans-serif;
+    font-size: 13px; padding: 10px 12px; outline: none; cursor: pointer;
   }
-  select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(79,70,229,0.1); }
+  select:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(79,70,229,0.08); }
+
+  /* Buttons */
   .btn {
-    border: none; padding: 10px 22px; border-radius: 10px;
-    font-family: 'Outfit', sans-serif; font-weight: 600;
-    font-size: 13px; cursor: pointer; transition: all 0.2s;
-    display: inline-flex; align-items: center; gap: 6px;
+    border: none; padding: 12px 26px; border-radius: 12px;
+    font-family: 'Inter', sans-serif; font-weight: 700;
+    font-size: 14px; cursor: pointer; transition: all 0.2s;
+    display: inline-flex; align-items: center; gap: 8px;
   }
   .btn:disabled { opacity: 0.4; cursor: not-allowed; }
   .btn-go { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; }
-  .btn-go:hover:not(:disabled) { box-shadow: 0 6px 20px rgba(79,70,229,0.35); transform: translateY(-1px); }
+  .btn-go:hover:not(:disabled) { box-shadow: 0 8px 24px rgba(79,70,229,0.3); transform: translateY(-2px); }
   .btn-stop { background: var(--red); color: #fff; }
   .btn-dim {
-    background: #f1f5f9; color: var(--dim);
-    border: 1px solid var(--border); padding: 8px 14px; font-size: 12px;
+    background: #f3f4f6; color: var(--dim);
+    border: 1px solid var(--border); padding: 10px 18px; font-size: 13px;
   }
-  .btn-dim:hover { background: #e2e8f0; color: var(--text); }
-  .tld-row { display: flex; flex-wrap: wrap; gap: 6px; }
+  .btn-dim:hover { background: #e5e7eb; color: var(--text); }
+
+  /* TLD Chips */
+  .tld-row { display: flex; flex-wrap: wrap; gap: 8px; }
   .tld-chip {
-    padding: 5px 14px; border-radius: 20px; font-size: 11.5px;
+    padding: 7px 16px; border-radius: 24px; font-size: 13px;
     font-weight: 600; cursor: pointer; transition: all 0.2s;
     border: 1.5px solid var(--border); background: #fff;
     color: var(--dim); user-select: none;
   }
-  .tld-chip:hover { border-color: #c7d2fe; color: var(--accent); }
+  .tld-chip:hover { border-color: #c7d2fe; color: var(--accent); background: #fafafe; }
   .tld-chip.on { background: #eef2ff; border-color: #a5b4fc; color: var(--accent); }
-  .tabs { display: flex; gap: 4px; padding: 10px 14px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 4px; padding: 12px 16px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
   .tab {
-    padding: 7px 14px; border-radius: 8px; font-size: 11.5px;
+    padding: 8px 16px; border-radius: 10px; font-size: 13px;
     font-weight: 600; cursor: pointer; border: none;
     background: transparent; color: var(--dim);
-    font-family: 'Outfit', sans-serif; transition: all 0.2s;
+    font-family: 'Inter', sans-serif; transition: all 0.2s;
   }
   .tab.on { background: #eef2ff; color: var(--accent); }
-  .tab:hover { color: var(--text); background: #f8fafc; }
-  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 18px; }
-  .stat-card { padding: 18px 14px; text-align: center; }
-  .stat-num { font-family: 'JetBrains Mono', monospace; font-size: 26px; font-weight: 700; line-height: 1; }
-  .stat-label { font-size: 10px; color: var(--dim); margin-top: 4px; font-family: 'Outfit', sans-serif; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
-  .scroll-box { max-height: 460px; overflow-y: auto; }
+  .tab:hover { color: var(--text); background: #f9fafb; }
+
+  /* Stats */
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+  .stat-card { padding: 22px 16px; text-align: center; }
+  .stat-num { font-family: 'JetBrains Mono', monospace; font-size: 32px; font-weight: 700; line-height: 1; }
+  .stat-label { font-size: 11px; color: var(--dim); margin-top: 6px; font-family: 'Inter', sans-serif; text-transform: uppercase; letter-spacing: 1.2px; font-weight: 700; }
+
+  /* Scroll / Results */
+  .scroll-box { max-height: 500px; overflow-y: auto; }
   .scroll-box::-webkit-scrollbar { width: 6px; }
-  .scroll-box::-webkit-scrollbar-track { background: #f8fafc; }
-  .scroll-box::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-  .scroll-box::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+  .scroll-box::-webkit-scrollbar-track { background: #fafafa; }
+  .scroll-box::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+  .scroll-box::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
   .row {
-    display: flex; align-items: center; padding: 12px 16px;
-    border-bottom: 1px solid #f1f5f9; gap: 12px; transition: background 0.15s;
+    display: flex; align-items: center; padding: 14px 18px;
+    border-bottom: 1px solid #f3f4f6; gap: 14px; transition: background 0.15s;
   }
   .row:last-child { border-bottom: none; }
-  .row:hover { background: #f8fafc; }
-  .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-  .row-domain { font-size: 13px; font-weight: 600; color: var(--text); font-family: 'JetBrains Mono', monospace; }
-  .row-info { font-size: 10.5px; color: var(--dim); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .row:hover { background: #f9fafb; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .row-domain { font-size: 14px; font-weight: 600; color: var(--text); font-family: 'JetBrains Mono', monospace; }
+  .row-info { font-size: 12px; color: var(--dim); margin-top: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .badge {
-    padding: 4px 10px; border-radius: 6px; font-size: 10px;
-    font-weight: 700; font-family: 'Outfit', sans-serif;
-    white-space: nowrap; letter-spacing: 0.5px;
+    padding: 5px 12px; border-radius: 8px; font-size: 11px;
+    font-weight: 700; font-family: 'Inter', sans-serif;
+    white-space: nowrap; letter-spacing: 0.3px;
   }
-  .bar-track { height: 4px; background: #e2e8f0; border-radius: 4px; overflow: hidden; }
-  .bar-fill { height: 100%; border-radius: 4px; transition: width 0.3s; background: linear-gradient(90deg, var(--accent), var(--accent2), #06b6d4); }
-  .label { font-size: 12px; color: var(--dim); margin-bottom: 6px; font-family: 'Outfit', sans-serif; font-weight: 500; }
-  .label-sm { font-size: 10px; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1.2px; font-family: 'Outfit', sans-serif; font-weight: 600; }
-  .actions { display: flex; gap: 8px; margin-top: 16px; align-items: center; flex-wrap: wrap; }
-  .footer { text-align: center; margin-top: 28px; font-size: 10px; color: var(--muted); font-family: 'Outfit', sans-serif; }
+
+  /* Progress */
+  .bar-track { height: 5px; background: #e5e7eb; border-radius: 5px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 5px; transition: width 0.3s; background: linear-gradient(90deg, var(--accent), var(--accent2), #06b6d4); }
+
+  /* Labels */
+  .label { font-size: 14px; color: var(--dim); margin-bottom: 8px; font-family: 'Inter', sans-serif; font-weight: 500; }
+  .label-sm { font-size: 11px; color: var(--muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1.5px; font-family: 'Inter', sans-serif; font-weight: 700; }
+  .actions { display: flex; gap: 10px; margin-top: 18px; align-items: center; flex-wrap: wrap; }
+  .footer { text-align: center; margin-top: 36px; font-size: 12px; color: var(--muted); font-family: 'Inter', sans-serif; }
   .hidden { display: none; }
-  .gen-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
-  .gen-box { background: #f8fafc; border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
-  .gen-box h3 { font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 700; color: var(--accent); margin-bottom: 10px; }
-  .gen-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; flex-wrap: wrap; }
-  .gen-label { font-size: 11px; color: var(--dim); font-family: 'Outfit', sans-serif; min-width: 70px; font-weight: 500; }
-  .gen-count { font-size: 11px; color: var(--accent); font-family: 'JetBrains Mono', monospace; background: #eef2ff; padding: 4px 12px; border-radius: 8px; font-weight: 600; }
-  .warn { font-size: 11px; color: #92400e; font-family: 'Outfit', sans-serif; padding: 10px 14px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; margin-top: 8px; font-weight: 500; }
+
+  /* Generator */
+  .gen-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px; }
+  .gen-box { background: #f9fafb; border: 1px solid var(--border); border-radius: 14px; padding: 20px; }
+  .gen-box h3 { font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 800; color: var(--accent); margin-bottom: 12px; }
+  .gen-row { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
+  .gen-label { font-size: 13px; color: var(--dim); font-family: 'Inter', sans-serif; min-width: 80px; font-weight: 500; }
+  .gen-count { font-size: 12px; color: var(--accent); font-family: 'JetBrains Mono', monospace; background: #eef2ff; padding: 6px 14px; border-radius: 10px; font-weight: 600; }
+  .warn { font-size: 13px; color: #92400e; font-family: 'Inter', sans-serif; padding: 12px 16px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px; margin-top: 10px; font-weight: 500; }
   .small-input {
     background: #fff; border: 1.5px solid var(--border);
-    border-radius: 8px; color: var(--text); font-family: 'JetBrains Mono', monospace;
-    font-size: 12px; padding: 7px 10px; width: 70px; outline: none; text-align: center;
+    border-radius: 10px; color: var(--text); font-family: 'JetBrains Mono', monospace;
+    font-size: 13px; padding: 9px 12px; width: 80px; outline: none; text-align: center;
   }
-  .small-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(79,70,229,0.1); }
-  .checkbox-row { display: flex; align-items: center; gap: 6px; cursor: pointer; }
-  .checkbox-row input { accent-color: var(--accent); cursor: pointer; }
-  .checkbox-row label { font-size: 11.5px; color: var(--dim); font-family: 'Outfit', sans-serif; cursor: pointer; font-weight: 500; }
+  .small-input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(79,70,229,0.08); }
+  .checkbox-row { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+  .checkbox-row input { accent-color: var(--accent); cursor: pointer; width: 16px; height: 16px; }
+  .checkbox-row label { font-size: 13px; color: var(--dim); font-family: 'Inter', sans-serif; cursor: pointer; font-weight: 500; }
 
+  /* Stat clickable */
   .stat-clickable { cursor: pointer; transition: all 0.2s; position: relative; }
-  .stat-clickable:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
-  .stat-clickable.active-filter { border-color: #a5b4fc; background: #eef2ff; }
+  .stat-clickable:hover { box-shadow: var(--shadow-md); transform: translateY(-3px); }
+  .stat-clickable.active-filter { border-color: #a5b4fc; background: #eef2ff; box-shadow: var(--shadow-md); }
   .stat-clickable.active-filter::after {
-    content: ''; position: absolute; bottom: -1px; left: 20%; right: 20%;
-    height: 3px; background: var(--accent); border-radius: 3px;
+    content: ''; position: absolute; bottom: -1px; left: 15%; right: 15%;
+    height: 3px; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 3px;
   }
-  @keyframes fadeUp { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes spin { to { transform: rotate(360deg); } }
-  .spinner { width: 10px; height: 10px; border: 2px solid var(--accent); border-top-color: transparent; border-radius: 50%; animation: spin 0.6s linear infinite; display: inline-block; }
-  @media (max-width: 640px) { .stats { grid-template-columns: repeat(2, 1fr); } .gen-grid { grid-template-columns: 1fr; } }
+  .spinner { width: 12px; height: 12px; border: 2.5px solid var(--accent); border-top-color: transparent; border-radius: 50%; animation: spin 0.6s linear infinite; display: inline-block; }
+
+  @media (max-width: 640px) {
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .gen-grid { grid-template-columns: 1fr; }
+    .header h1 { font-size: 26px; }
+    .mode-b { padding: 8px 16px; font-size: 13px; }
+  }
 </style>
 </head>
 <body>
@@ -182,7 +215,7 @@
     </div>
   </div>
 
-  <div class="card" style="padding:18px; margin-bottom:16px;">
+  <div class="card" style="padding:24px; margin-bottom:20px;">
 
     <!-- GENERATOR SECTION -->
     <div id="genSection" class="hidden">
@@ -299,7 +332,7 @@
           <input class="kinput" id="aiKeywordInput" placeholder="örn: yapay zeka, fintech, sağlık..." onkeydown="if(event.key==='Enter')generateAIDomains()">
           <button class="btn btn-go" id="aiGenerateBtn" onclick="generateAIDomains()">🤖 Üret</button>
         </div>
-        <div style="margin-top:6px;font-size:10px;color:#94a3b8;font-family:'Outfit',sans-serif;">
+        <div style="margin-top:6px;font-size:10px;color:#94a3b8;font-family:'Inter',sans-serif;">
           Claude API kullanır — API anahtarı gerektirir (tarayıcıdan doğrudan çalışmayabilir)
         </div>
       </div>
@@ -321,7 +354,7 @@
     <div style="margin-top:10px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
       <div style="display:flex;align-items:center;gap:5px;">
         <span class="gen-label" style="min-width:auto;">⚡ Hız:</span>
-        <select id="speedMode" style="font-size:10.5px;padding:5px 10px;background:#fff;border:1.5px solid #e2e8f0;border-radius:8px;color:#475569;font-family:'Outfit',sans-serif;cursor:pointer;outline:none;">
+        <select id="speedMode" style="font-size:13px;padding:8px 12px;background:#fff;border:1.5px solid #e5e7eb;border-radius:10px;color:#374151;font-family:'Inter',sans-serif;cursor:pointer;outline:none;">
           <option value="slow">Yavaş (2 paralel, 800ms)</option>
           <option value="normal" selected>Normal (5 paralel, 400ms)</option>
           <option value="fast">Hızlı (10 paralel, 200ms)</option>
@@ -331,7 +364,7 @@
       </div>
       <div style="display:flex;align-items:center;gap:5px;">
         <span class="gen-label" style="min-width:auto;">🌐 DNS:</span>
-        <select id="dnsMode" style="font-size:10.5px;padding:5px 10px;background:#fff;border:1.5px solid #e2e8f0;border-radius:8px;color:#475569;font-family:'Outfit',sans-serif;cursor:pointer;outline:none;">
+        <select id="dnsMode" style="font-size:13px;padding:8px 12px;background:#fff;border:1.5px solid #e5e7eb;border-radius:10px;color:#374151;font-family:'Inter',sans-serif;cursor:pointer;outline:none;">
           <option value="auto" selected>Otomatik (RDAP → Google → CF)</option>
           <option value="dns_only">Sadece DNS (hızlı, daha az detay)</option>
           <option value="rdap_only">Sadece RDAP (yavaş, en detaylı)</option>
@@ -347,18 +380,18 @@
       <button class="btn btn-go" id="startBtn" onclick="startCheck()">🔍 Kontrol Başlat</button>
       <button class="btn btn-stop hidden" id="stopBtn" onclick="stopCheck()">⏹ Durdur</button>
       <button class="btn btn-dim" onclick="loadSample()">Örnek Yükle</button>
-      <span id="domainCountBadge" style="font-size:11px;color:#4f46e5;font-weight:600;font-family:'Outfit',sans-serif"></span>
+      <span id="domainCountBadge" style="font-size:14px;color:#4f46e5;font-weight:600;font-family:'Inter',sans-serif"></span>
       <button class="btn btn-dim hidden" id="csvBtn" onclick="exportCSV()" style="margin-left:auto;">📥 CSV</button>
       <button class="btn btn-dim hidden" id="copyBtn" onclick="copyAvailable()">📋 Müsaitleri Kopyala</button>
     </div>
 
     <div id="progressSection" class="hidden" style="margin-top:12px;">
-      <div style="display:flex; justify-content:space-between; font-size:10.5px; color:#64748b; margin-bottom:4px;">
+      <div style="display:flex; justify-content:space-between; font-size:13px; color:#6b7280; margin-bottom:6px;">
         <span style="display:flex;align-items:center;gap:5px;"><span class="spinner"></span> Kontrol ediliyor...</span>
         <span id="progressText">0 / 0</span>
       </div>
       <div class="bar-track"><div class="bar-fill" id="progressBar" style="width:0%"></div></div>
-      <div style="display:flex;justify-content:space-between;font-size:10px;color:#94a3b8;margin-top:3px;">
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:#9ca3af;margin-top:4px;">
         <span id="speedText"></span>
         <span id="etaText"></span>
       </div>
@@ -376,7 +409,7 @@
     <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid #f1f5f9;flex-wrap:wrap;gap:6px;">
       <div class="tabs" id="filterTabs" style="padding:0;border:none;display:flex;gap:3px;flex-wrap:wrap;"></div>
       <div style="display:flex;gap:6px;align-items:center;" id="resultActions">
-        <select id="sortSelect" onchange="renderResults()" style="font-size:10.5px;padding:5px 10px;background:#fff;border:1.5px solid #e2e8f0;border-radius:8px;color:#475569;font-family:'Outfit',sans-serif;cursor:pointer;outline:none;">
+        <select id="sortSelect" onchange="renderResults()" style="font-size:13px;padding:8px 12px;background:#fff;border:1.5px solid #e5e7eb;border-radius:10px;color:#374151;font-family:'Inter',sans-serif;cursor:pointer;outline:none;">
           <option value="default">Sıralama: Varsayılan</option>
           <option value="expiry_asc">📅 Bitiş tarihi (en yakın)</option>
           <option value="expiry_desc">📅 Bitiş tarihi (en uzak)</option>
@@ -389,7 +422,7 @@
         <button class="btn btn-dim hidden" id="copyFilteredBtn" onclick="copyFiltered()" style="font-size:10.5px;padding:5px 10px;">📋 Listeyi Kopyala</button>
       </div>
     </div>
-    <div id="resultInfo" style="padding:8px 14px;font-size:10.5px;color:#64748b;text-align:center;font-family:'Outfit',sans-serif;border-bottom:1px solid #f1f5f9;display:none;background:#f8fafc;"></div>
+    <div id="resultInfo" style="padding:10px 16px;font-size:13px;color:#6b7280;text-align:center;font-family:'Inter',sans-serif;border-bottom:1px solid #f3f4f6;display:none;background:#f9fafb;"></div>
     <div class="scroll-box" id="resultsList"></div>
     <div id="loadMoreWrap" style="display:none;text-align:center;padding:10px;">
       <button class="btn btn-dim" onclick="showMore()" id="loadMoreBtn" style="font-size:10.5px;">Daha fazla göster</button>
@@ -397,11 +430,11 @@
   </div>
 
   <!-- TRADEMARK SEARCH SECTION -->
-  <div class="card" style="padding:18px; margin-top:16px;" id="trademarkSection">
+  <div class="card" style="padding:24px; margin-top:20px;" id="trademarkSection">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
       <span style="font-size:18px;">🏛️</span>
-      <h2 style="font-family:'Outfit',sans-serif;font-size:16px;font-weight:700;color:#1e293b;margin:0;">Marka Sorgulama</h2>
-      <span style="font-size:10px;color:#94a3b8;font-family:'Outfit',sans-serif;">WIPO Global Brand DB + Türkpatent + USPTO + EUIPO</span>
+      <h2 style="font-family:'Inter',sans-serif;font-size:20px;font-weight:800;color:#111827;margin:0;">Marka Sorgulama</h2>
+      <span style="font-size:13px;color:#9ca3af;font-family:'Inter',sans-serif;">WIPO + Türkpatent + USPTO + EUIPO</span>
     </div>
     <div class="label">Marka adı girin — Türkiye dahil 60+ ülke marka veritabanında aranır</div>
     <div style="display:flex;gap:8px;">
@@ -419,15 +452,15 @@
       <span class="spinner"></span> Marka veritabanları sorgulanıyor...
     </div>
     <div id="tmResults" style="margin-top:12px;display:none;">
-      <div id="tmSummary" style="padding:8px 12px;border-radius:8px;font-size:11px;font-family:'Outfit',sans-serif;margin-bottom:8px;"></div>
+      <div id="tmSummary" style="padding:8px 12px;border-radius:8px;font-size:11px;font-family:'Inter',sans-serif;margin-bottom:8px;"></div>
       <div id="tmList" class="scroll-box" style="max-height:300px;"></div>
     </div>
     <div id="tmLinks" style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
-      <span class="label" style="margin:0;font-size:10px;color:#94a3b8;">Manuel kontrol:</span>
-      <a href="https://online.turkpatent.gov.tr/trademark-search/pub/trademark_search" target="_blank" style="font-size:10.5px;color:#4f46e5;text-decoration:none;font-family:'Outfit',sans-serif;font-weight:500;">Türkpatent ↗</a>
-      <a href="https://branddb.wipo.int/" target="_blank" style="font-size:10.5px;color:#4f46e5;text-decoration:none;font-family:'Outfit',sans-serif;font-weight:500;">WIPO ↗</a>
-      <a href="https://tmsearch.uspto.gov/" target="_blank" style="font-size:10.5px;color:#4f46e5;text-decoration:none;font-family:'Outfit',sans-serif;font-weight:500;">USPTO ↗</a>
-      <a href="https://euipo.europa.eu/eSearch/" target="_blank" style="font-size:10.5px;color:#4f46e5;text-decoration:none;font-family:'Outfit',sans-serif;font-weight:500;">EUIPO ↗</a>
+      <span class="label" style="margin:0;font-size:12px;color:#9ca3af;">Manuel kontrol:</span>
+      <a href="https://online.turkpatent.gov.tr/trademark-search/pub/trademark_search" target="_blank" style="font-size:13px;color:#4f46e5;text-decoration:none;font-family:'Inter',sans-serif;font-weight:600;">Türkpatent ↗</a>
+      <a href="https://branddb.wipo.int/" target="_blank" style="font-size:13px;color:#4f46e5;text-decoration:none;font-family:'Inter',sans-serif;font-weight:600;">WIPO ↗</a>
+      <a href="https://tmsearch.uspto.gov/" target="_blank" style="font-size:13px;color:#4f46e5;text-decoration:none;font-family:'Inter',sans-serif;font-weight:600;">USPTO ↗</a>
+      <a href="https://euipo.europa.eu/eSearch/" target="_blank" style="font-size:13px;color:#4f46e5;text-decoration:none;font-family:'Inter',sans-serif;font-weight:600;">EUIPO ↗</a>
     </div>
   </div>
 
@@ -1261,11 +1294,11 @@ function renderResults() {
     if (r.expiryDate) {
       const diffDays = Math.ceil((new Date(r.expiryDate) - new Date()) / (1000*60*60*24));
       if (diffDays < 0) {
-        expiryBadge = `<span style="font-size:9px;padding:2px 8px;border-radius:6px;background:#f5f3ff;color:#7c3aed;font-family:'Outfit',sans-serif;margin-left:6px;font-weight:600;">⚡ DOLMUŞ ${Math.abs(diffDays)}g</span>`;
+        expiryBadge = `<span style="font-size:9px;padding:2px 8px;border-radius:6px;background:#f5f3ff;color:#7c3aed;font-family:'Inter',sans-serif;margin-left:6px;font-weight:600;">⚡ DOLMUŞ ${Math.abs(diffDays)}g</span>`;
       } else if (diffDays <= 30) {
-        expiryBadge = `<span style="font-size:9px;padding:2px 8px;border-radius:6px;background:#fef2f2;color:#dc2626;font-family:'Outfit',sans-serif;margin-left:6px;font-weight:600;">🔥 ${diffDays}g kaldı</span>`;
+        expiryBadge = `<span style="font-size:9px;padding:2px 8px;border-radius:6px;background:#fef2f2;color:#dc2626;font-family:'Inter',sans-serif;margin-left:6px;font-weight:600;">🔥 ${diffDays}g kaldı</span>`;
       } else if (diffDays <= 90) {
-        expiryBadge = `<span style="font-size:9px;padding:2px 8px;border-radius:6px;background:#fffbeb;color:#d97706;font-family:'Outfit',sans-serif;margin-left:6px;font-weight:600;">⏰ ${diffDays}g kaldı</span>`;
+        expiryBadge = `<span style="font-size:9px;padding:2px 8px;border-radius:6px;background:#fffbeb;color:#d97706;font-family:'Inter',sans-serif;margin-left:6px;font-weight:600;">⏰ ${diffDays}g kaldı</span>`;
       }
     }
 
@@ -1671,7 +1704,7 @@ async function searchTrademark() {
             <div style="flex:1;min-width:0">
               <div style="display:flex;align-items:center;gap:8px;">
                 <span style="font-size:12px;font-weight:600;color:#1e293b;">${r.name}</span>
-                <span style="font-size:9px;padding:2px 6px;border-radius:4px;background:#f1f5f9;color:${statusColor};font-family:'Outfit',sans-serif;">${r.status}</span>
+                <span style="font-size:9px;padding:2px 6px;border-radius:4px;background:#f1f5f9;color:${statusColor};font-family:'Inter',sans-serif;">${r.status}</span>
               </div>
               <div style="font-size:10px;color:#64748b;margin-top:2px;">
                 ${sourceLabel2}${r.country ? " · " + r.country : ""}${r.owner ? " · " + r.owner : ""}${r.niceClass ? " · Sınıf: " + r.niceClass : ""}${r.date ? " · " + r.date.substring(0, 10) : ""}
@@ -1701,10 +1734,10 @@ async function searchTrademark() {
 
   listDiv.innerHTML = `
     <div style="padding:12px;display:flex;flex-direction:column;gap:8px;">
-      <a href="https://online.turkpatent.gov.tr/trademark-search/pub/trademark_search" target="_blank" style="color:#4f46e5;font-size:12px;text-decoration:none;font-family:'Outfit',sans-serif;">🇹🇷 Türkpatent Marka Araştırma → "${query}" yazarak arayın ↗</a>
-      <a href="https://branddb.wipo.int/branddb/en/#702" target="_blank" style="color:#4f46e5;font-size:12px;text-decoration:none;font-family:'Outfit',sans-serif;">🌐 WIPO Global Brand Database → "${query}" yazarak arayın ↗</a>
-      <a href="https://tmsearch.uspto.gov/" target="_blank" style="color:#4f46e5;font-size:12px;text-decoration:none;font-family:'Outfit',sans-serif;">🇺🇸 USPTO TESS → "${query}" yazarak arayın ↗</a>
-      <a href="https://euipo.europa.eu/eSearch/#basic/1+1+1+1/100+100+100+100/${encodeURIComponent(query)}" target="_blank" style="color:#4f46e5;font-size:12px;text-decoration:none;font-family:'Outfit',sans-serif;">🇪🇺 EUIPO eSearch → "${query}" yazarak arayın ↗</a>
+      <a href="https://online.turkpatent.gov.tr/trademark-search/pub/trademark_search" target="_blank" style="color:#4f46e5;font-size:12px;text-decoration:none;font-family:'Inter',sans-serif;">🇹🇷 Türkpatent Marka Araştırma → "${query}" yazarak arayın ↗</a>
+      <a href="https://branddb.wipo.int/branddb/en/#702" target="_blank" style="color:#4f46e5;font-size:12px;text-decoration:none;font-family:'Inter',sans-serif;">🌐 WIPO Global Brand Database → "${query}" yazarak arayın ↗</a>
+      <a href="https://tmsearch.uspto.gov/" target="_blank" style="color:#4f46e5;font-size:12px;text-decoration:none;font-family:'Inter',sans-serif;">🇺🇸 USPTO TESS → "${query}" yazarak arayın ↗</a>
+      <a href="https://euipo.europa.eu/eSearch/#basic/1+1+1+1/100+100+100+100/${encodeURIComponent(query)}" target="_blank" style="color:#4f46e5;font-size:12px;text-decoration:none;font-family:'Inter',sans-serif;">🇪🇺 EUIPO eSearch → "${query}" yazarak arayın ↗</a>
     </div>
   `;
 }
