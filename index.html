@@ -185,6 +185,7 @@
   }
 
   @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes spin { to { transform: rotate(360deg); } }
   .spinner { width: 12px; height: 12px; border: 2.5px solid var(--accent); border-top-color: transparent; border-radius: 50%; animation: spin 0.6s linear infinite; display: inline-block; }
 
@@ -216,6 +217,13 @@
   </div>
 
   <div class="card" style="padding:24px; margin-bottom:20px;">
+
+    <!-- Engelli Harfler — tüm üreticiler için ortak -->
+    <div id="excludeSection" class="hidden" style="margin-bottom:16px;padding:12px 16px;background:#fef3c7;border:1px solid #fbbf24;border-radius:12px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+      <span style="font-weight:600;font-size:13px;color:#92400e;">🚫 Engelli harfler:</span>
+      <input type="text" class="small-input" id="globalExclude" placeholder="örn: qwx" style="width:160px;font-family:'JetBrains Mono',monospace;letter-spacing:2px;" oninput="updatePreview()">
+      <span style="font-size:12px;color:#92400e;" id="excludeInfo">Bu harfler tüm üreticilerde devre dışı kalır</span>
+    </div>
 
     <!-- GENERATOR SECTION -->
     <div id="genSection" class="hidden">
@@ -500,6 +508,7 @@ function setMode(m) {
   document.getElementById("patternSection").className = m === "pattern" ? "" : "hidden";
   document.getElementById("aiSection").className = m === "ai" ? "" : "hidden";
   document.getElementById("listSection").className = m === "list" ? "" : "hidden";
+  document.getElementById("excludeSection").className = (m === "list") ? "hidden" : "";
   if (m === "generate") updatePreview();
 }
 
@@ -512,22 +521,36 @@ function loadSample() {
 const VOWELS = "aeiou";
 const CONSONANTS = "bcdfghjklmnpqrstvwxyz";
 
+function getExcludedChars() {
+  return (document.getElementById("globalExclude").value || "").toLowerCase().replace(/[^a-z0-9]/g, "").split("").filter(c => c);
+}
+
+function filterChars(str, excluded) {
+  return str.split("").filter(c => !excluded.includes(c)).join("");
+}
+
 function getBruteTotal() {
   const len = parseInt(document.getElementById("bruteLen").value) || 3;
   const mode = document.getElementById("bruteChars").value;
-  if (mode === "alpha") return Math.pow(26, len);
-  if (mode === "alphanum") return Math.pow(36, len);
+  const ex = getExcludedChars();
+  const alpha = filterChars("abcdefghijklmnopqrstuvwxyz", ex);
+  const alphanum = filterChars("abcdefghijklmnopqrstuvwxyz0123456789", ex);
+  const vowels = filterChars(VOWELS, ex);
+  const consonants = filterChars(CONSONANTS, ex);
+
+  if (mode === "alpha") return Math.pow(alpha.length, len);
+  if (mode === "alphanum") return Math.pow(alphanum.length, len);
   if (mode === "vowel") {
     let c = 0, v = 0;
     for (let i = 0; i < len; i++) { if (i % 2 === 0) c++; else v++; }
-    return Math.pow(21, c) * Math.pow(5, v);
+    return Math.pow(consonants.length, c) * Math.pow(vowels.length, v);
   }
   if (mode === "consonant") {
     let c = 0, v = 0;
     for (let i = 0; i < len; i++) { if (i % 2 === 0) v++; else c++; }
-    return Math.pow(5, v) * Math.pow(21, c);
+    return Math.pow(vowels.length, v) * Math.pow(consonants.length, c);
   }
-  return Math.pow(26, len);
+  return Math.pow(alpha.length, len);
 }
 
 function updatePreview() {
@@ -537,13 +560,14 @@ function updatePreview() {
   el.textContent = `Toplam: ${total.toLocaleString("tr-TR")} kombinasyon → ${Math.min(limit, total).toLocaleString("tr-TR")} üretilecek`;
 }
 
-function* bruteForceGenerator(len, charMode, startStr, endStr) {
+function* bruteForceGenerator(len, charMode, startStr, endStr, excluded) {
+  const ex = excluded || [];
   function getCharset(pos) {
-    if (charMode === "alpha") return "abcdefghijklmnopqrstuvwxyz";
-    if (charMode === "alphanum") return "abcdefghijklmnopqrstuvwxyz0123456789";
-    if (charMode === "vowel") return pos % 2 === 0 ? CONSONANTS : VOWELS;
-    if (charMode === "consonant") return pos % 2 === 0 ? VOWELS : CONSONANTS;
-    return "abcdefghijklmnopqrstuvwxyz";
+    if (charMode === "alpha") return filterChars("abcdefghijklmnopqrstuvwxyz", ex);
+    if (charMode === "alphanum") return filterChars("abcdefghijklmnopqrstuvwxyz0123456789", ex);
+    if (charMode === "vowel") return pos % 2 === 0 ? filterChars(CONSONANTS, ex) : filterChars(VOWELS, ex);
+    if (charMode === "consonant") return pos % 2 === 0 ? filterChars(VOWELS, ex) : filterChars(CONSONANTS, ex);
+    return filterChars("abcdefghijklmnopqrstuvwxyz", ex);
   }
 
   const charsets = [];
@@ -607,7 +631,7 @@ function generateBrute() {
   }
 
   let collected = [];
-  const gen = bruteForceGenerator(len, charMode, startStr, endStr);
+  const gen = bruteForceGenerator(len, charMode, startStr, endStr, getExcludedChars());
 
   if (randomize && total <= 500000) {
     const all = [];
@@ -667,9 +691,10 @@ function generateKeyword() {
   const middles = ["and","or","to","for","in","on","at","by","of","is","it","no","so","do","go","be","me","we","up","my"];
 
   const names = new Set();
+  const excluded = getExcludedChars();
   const add = (n) => {
     const clean = n.replace(/[^a-z0-9-]/g, "");
-    if (clean.length >= 2 && clean.length <= maxLen) names.add(clean);
+    if (clean.length >= 2 && clean.length <= maxLen && !excluded.some(c => clean.includes(c))) names.add(clean);
   };
 
   if (mode === "all" || mode === "prefix") {
@@ -795,11 +820,15 @@ PATTERNS.forEach(p => {
   patternChips.appendChild(chip);
 });
 
-function genFromPattern(pat) {
+function genFromPattern(pat, excluded) {
+  const ex = excluded || [];
+  const vowels = filterChars(PATTERN_VOWELS, ex);
+  const consonants = filterChars(PATTERN_CONSONANTS, ex);
+  if (!vowels.length || !consonants.length) return "";
   let word = "";
   for (const ch of pat.toUpperCase()) {
-    if (ch === "V") word += PATTERN_VOWELS[Math.floor(Math.random() * PATTERN_VOWELS.length)];
-    else if (ch === "C") word += PATTERN_CONSONANTS[Math.floor(Math.random() * PATTERN_CONSONANTS.length)];
+    if (ch === "V") word += vowels[Math.floor(Math.random() * vowels.length)];
+    else if (ch === "C") word += consonants[Math.floor(Math.random() * consonants.length)];
   }
   return word;
 }
@@ -819,10 +848,11 @@ function generateFromPattern() {
   if (!patterns.length) { alert("En az bir kalıp seçin veya özel kalıp girin (C ve V harfleri ile)"); return; }
 
   const names = new Set();
+  const excluded = getExcludedChars();
   let attempts = 0;
   while (names.size < count && attempts < count * 10) {
     const pat = patterns[Math.floor(Math.random() * patterns.length)];
-    const word = prefix + genFromPattern(pat) + suffix;
+    const word = prefix + genFromPattern(pat, excluded) + suffix;
     if (word.length >= 3) names.add(word);
     attempts++;
   }
@@ -845,12 +875,13 @@ async function generateAIDomains() {
       body: JSON.stringify({
         model: "claude-sonnet-4-20250514",
         max_tokens: 1000,
-        messages: [{ role: "user", content: '"' + kw + '" anahtar kelimesine dayalı 20 yaratıcı, kısa domain adı öner. TLD ekleme. Her satıra bir tane. Numara/açıklama yok.' }]
+        messages: [{ role: "user", content: '"' + kw + '" anahtar kelimesine dayalı 20 yaratıcı, kısa domain adı öner. TLD ekleme. Her satıra bir tane. Numara/açıklama yok.' + (getExcludedChars().length ? ' ŞU HARFLERİ KESİNLİKLE KULLANMA: ' + getExcludedChars().join(', ') + '.' : '') }]
       })
     });
     const data = await resp.json();
     const text = (data.content && data.content[0] && data.content[0].text) || "";
-    const names = text.split("\n").map(l => l.trim().replace(/^\d+[\.\)\-]\s*/, "").replace(/\s.*$/, "")).filter(l => l && l.length > 1);
+    const excluded = getExcludedChars();
+    const names = text.split("\n").map(l => l.trim().replace(/^\d+[\.\)\-]\s*/, "").replace(/\s.*$/, "")).filter(l => l && l.length > 1).filter(n => !excluded.length || !excluded.some(c => n.toLowerCase().includes(c)));
     if (names.length) {
       document.getElementById("domainInput").value = names.join("\n");
       setMode("list");
@@ -1409,6 +1440,25 @@ updatePreview();
 
 // ===================== TRADEMARK SEARCH =====================
 
+function addLiveTmResult(r) {
+  const liveList = document.getElementById("tmLiveList");
+  if (!liveList) return;
+  const isClear = r.status === "CLEAR";
+  const src = r.source === "TR" ? "🇹🇷" : r.source === "US" ? "🇺🇸" : r.source === "EM" ? "🇪🇺" : r.source === "WO" ? "🌐" : r.source;
+  const item = document.createElement("div");
+  item.style.cssText = "display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:8px;font-size:12px;animation:fadeIn .3s;" +
+    (isClear ? "background:#ecfdf5;border:1px solid #a7f3d0;" : "background:#fef2f2;border:1px solid #fecaca;");
+  item.innerHTML = '<span style="font-size:14px;">' + (isClear ? '✅' : '⚠️') + '</span>' +
+    '<span style="font-weight:700;' + (isClear ? 'color:#047857;' : 'color:#b91c1c;') + '">' + r.brand + '</span>' +
+    '<span style="color:#64748b;font-size:11px;">→ ' +
+      (isClear
+        ? (r.totalFound > 0 ? r.totalFound + ' benzer sonuç, tam eşleşme yok' : 'Kayıt bulunamadı — TEMİZ')
+        : 'Çakışma: "' + r.name + '" ' + src + ' ' + r.source + (r.country ? ' · ' + r.country : '') + (r.owner ? ' · ' + r.owner : '') + (r.niceClass ? ' · Sınıf: ' + r.niceClass : '')) +
+    '</span>';
+  liveList.appendChild(item);
+  item.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
 async function autoTrademarkCheck(availableDomains) {
   const loading = document.getElementById("tmLoading");
   const resultsDiv = document.getElementById("tmResults");
@@ -1425,7 +1475,12 @@ async function autoTrademarkCheck(availableDomains) {
 
   loading.classList.remove("hidden");
   loading.innerHTML = '<span class="spinner"></span> Marka kontrolü başlıyor... (' + totalBrands + ' isim sorgulanacak)';
-  resultsDiv.style.display = "none";
+  resultsDiv.style.display = "block";
+  summaryDiv.style.background = "#f8fafc";
+  summaryDiv.style.color = "#1e293b";
+  summaryDiv.style.border = "1px solid #e2e8f0";
+  summaryDiv.innerHTML = '<div style="font-weight:700;font-size:14px;margin-bottom:8px;">📊 Marka Kontrol Özeti — sorgulanıyor...</div><div id="tmLiveList" style="display:flex;flex-direction:column;gap:4px;"></div>';
+  listDiv.innerHTML = "";
 
   document.getElementById("trademarkSection").scrollIntoView({ behavior: "smooth", block: "start" });
 
@@ -1434,11 +1489,11 @@ async function autoTrademarkCheck(availableDomains) {
   let errorCount = 0;
   const tmStartTime = Date.now();
 
-  const batchSize = 10;
-  const delayBetween = 400;
-  const batchPause = 2000;
-  const longPause = 5000;
-  const errorThreshold = 3;
+  const batchSize = 5;
+  const delayBetween = 2000;
+  const batchPause = 5000;
+  const longPause = 10000;
+  const errorThreshold = 2;
 
   for (let i = 0; i < totalBrands; i++) {
     if (aborted) break;
@@ -1495,7 +1550,7 @@ async function autoTrademarkCheck(availableDomains) {
 
           if (matches.length > 0) {
             matches.forEach(doc => {
-              allTmResults.push({
+              const result = {
                 brand, name: (Array.isArray(doc.BRAND) ? doc.BRAND[0] : doc.BRAND) || "—",
                 source: (Array.isArray(doc.SOURCE) ? doc.SOURCE[0] : doc.SOURCE) || "—",
                 status: (Array.isArray(doc.STATUS) ? doc.STATUS[0] : doc.STATUS) || "—",
@@ -1503,16 +1558,21 @@ async function autoTrademarkCheck(availableDomains) {
                 country: (Array.isArray(doc.OO) ? doc.OO[0] : doc.OO) || "",
                 niceClass: (Array.isArray(doc.NC) ? doc.NC.join(", ") : doc.NC) || "",
                 totalFound: total,
-              });
+              };
+              allTmResults.push(result);
+              addLiveTmResult(result);
             });
           } else {
-            allTmResults.push({ brand, name: brand, source: "—", status: "CLEAR", owner: "", country: "", niceClass: "", totalFound: total });
+            const result = { brand, name: brand, source: "—", status: "CLEAR", owner: "", country: "", niceClass: "", totalFound: total };
+            allTmResults.push(result);
+            addLiveTmResult(result);
           }
         } catch {}
       } else if (resp.status === 429) {
         errorCount++;
-        loading.innerHTML = `<div style="color:#d97706;"><span class="spinner"></span> Rate limit — ${longPause/1000}sn bekleniyor... (${checked}/${totalBrands})</div>`;
-        await new Promise(r => setTimeout(r, longPause));
+        const waitTime = longPause * errorCount;
+        loading.innerHTML = `<div style="color:#d97706;"><span class="spinner"></span> Rate limit — ${waitTime/1000}sn bekleniyor... (${checked}/${totalBrands})</div>`;
+        await new Promise(r => setTimeout(r, waitTime));
         i--; checked--;
         continue;
       } else {
@@ -1540,38 +1600,31 @@ async function autoTrademarkCheck(availableDomains) {
   const conflicts = allTmResults.filter(r => r.status !== "CLEAR");
   const clear = allTmResults.filter(r => r.status === "CLEAR");
 
-  if (conflicts.length === 0) {
-    summaryDiv.style.background = "#ecfdf5";
-    summaryDiv.style.color = "#047857";
-    summaryDiv.style.border = "1px solid #a7f3d0";
-    summaryDiv.innerHTML = '✅ Müsait domainlerin hiçbirinde tescilli marka çakışması bulunamadı! (' + totalBrands + ' isim kontrol edildi)';
-  } else {
-    summaryDiv.style.background = "#fef2f2";
-    summaryDiv.style.color = "#b91c1c";
-    summaryDiv.style.border = "1px solid #fecaca";
-    summaryDiv.innerHTML = '⚠️ <strong>' + conflicts.length + '</strong> marka çakışması bulundu! ' + clear.length + ' isim temiz. (' + totalBrands + ' kontrol edildi)';
+  // Canlı listeyi koru, sadece başlığı ve border rengini güncelle
+  const liveHeader = summaryDiv.querySelector("div:first-child");
+  if (liveHeader) {
+    const statusText = conflicts.length > 0
+      ? ' — ⚠️ ' + conflicts.length + ' çakışma, ✅ ' + clear.length + ' temiz'
+      : ' — ✅ Tümü temiz!';
+    liveHeader.innerHTML = '📊 Marka Kontrol Özeti — ' + totalBrands + ' isim kontrol edildi' + statusText;
   }
+  summaryDiv.style.border = conflicts.length > 0 ? "1px solid #fecaca" : "1px solid #a7f3d0";
 
   listDiv.innerHTML = "";
 
-  const sorted = [...conflicts, ...clear];
-  sorted.forEach(r => {
-    const isClear = r.status === "CLEAR";
-    const sourceLabel2 = r.source === "TR" ? "🇹🇷" : r.source === "US" ? "🇺🇸" : r.source === "EM" ? "🇪🇺" : r.source === "WO" ? "🌐" : r.source;
+  // Çakışma listesi
+  if (conflicts.length > 0) {
+    const header1 = document.createElement("div");
+    header1.style.cssText = "font-size:13px;font-weight:700;color:#b91c1c;padding:12px 0 6px;border-bottom:2px solid #fecaca;margin-bottom:4px;";
+    header1.textContent = "⚠️ Marka Çakışması Olanlar (" + conflicts.length + ")";
+    listDiv.appendChild(header1);
 
-    const row = document.createElement("div");
-    row.className = "row";
-    if (isClear) {
+    conflicts.forEach((r, idx) => {
+      const sourceLabel2 = r.source === "TR" ? "🇹🇷" : r.source === "US" ? "🇺🇸" : r.source === "EM" ? "🇪🇺" : r.source === "WO" ? "🌐" : r.source;
+      const row = document.createElement("div");
+      row.className = "row";
       row.innerHTML = `
-        <div class="dot" style="background:#059669"></div>
-        <div style="flex:1;min-width:0">
-          <div style="font-size:12px;font-weight:600;color:#1e293b;">${r.brand}</div>
-          <div style="font-size:10px;color:#64748b;margin-top:1px;">${r.totalFound > 0 ? r.totalFound + ' benzer sonuç var ama tam eşleşme yok' : 'Hiç sonuç yok'}</div>
-        </div>
-        <div class="badge" style="background:#ecfdf5;color:#047857;border:1px solid #a7f3d0">TEMİZ</div>
-      `;
-    } else {
-      row.innerHTML = `
+        <div style="font-size:11px;color:#94a3b8;font-weight:600;min-width:24px;">${idx + 1}.</div>
         <div class="dot" style="background:#dc2626"></div>
         <div style="flex:1;min-width:0">
           <div style="display:flex;align-items:center;gap:6px;">
@@ -1584,9 +1637,32 @@ async function autoTrademarkCheck(availableDomains) {
         </div>
         <div class="badge" style="background:#fef2f2;color:#b91c1c;border:1px solid #fecaca">ÇAKIŞMA</div>
       `;
-    }
-    listDiv.appendChild(row);
-  });
+      listDiv.appendChild(row);
+    });
+  }
+
+  // Temiz listesi
+  if (clear.length > 0) {
+    const header2 = document.createElement("div");
+    header2.style.cssText = "font-size:13px;font-weight:700;color:#047857;padding:12px 0 6px;border-bottom:2px solid #a7f3d0;margin-bottom:4px;" + (conflicts.length > 0 ? "margin-top:16px;" : "");
+    header2.textContent = "✅ Müsait — Marka Temiz (" + clear.length + ")";
+    listDiv.appendChild(header2);
+
+    clear.forEach((r, idx) => {
+      const row = document.createElement("div");
+      row.className = "row";
+      row.innerHTML = `
+        <div style="font-size:11px;color:#94a3b8;font-weight:600;min-width:24px;">${idx + 1}.</div>
+        <div class="dot" style="background:#059669"></div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12px;font-weight:600;color:#1e293b;">${r.brand}</div>
+          <div style="font-size:10px;color:#64748b;margin-top:1px;">${r.totalFound > 0 ? r.totalFound + ' benzer sonuç var ama tam eşleşme yok' : 'WIPO veritabanında kayıt bulunamadı'}</div>
+        </div>
+        <div class="badge" style="background:#ecfdf5;color:#047857;border:1px solid #a7f3d0">TEMİZ</div>
+      `;
+      listDiv.appendChild(row);
+    });
+  }
 
   results.forEach(r => {
     if (r.status !== "available") return;
