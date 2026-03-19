@@ -1723,10 +1723,17 @@ async function autoTrademarkCheck(availableDomains) {
   loading.classList.add("hidden");
   resultsDiv.style.display = "block";
 
+  // allTmResults boşsa bile brandNames'ten listeyi oluştur
+  if (allTmResults.length === 0) {
+    brandNames.forEach(brand => {
+      allTmResults.push({ brand, name: brand, source: "—", status: "CLEAR", owner: "", country: "", niceClass: "", totalFound: 0, apiError: true });
+    });
+  }
+
   const conflicts = allTmResults.filter(r => r.status !== "CLEAR");
   const clear = allTmResults.filter(r => r.status === "CLEAR");
 
-  // Özet başlık — her zaman brand listesi göster
+  // Özet başlık
   if (conflicts.length > 0) {
     summaryDiv.style.background = "#fef2f2";
     summaryDiv.style.color = "#b91c1c";
@@ -1740,16 +1747,6 @@ async function autoTrademarkCheck(availableDomains) {
   }
 
   listDiv.innerHTML = "";
-
-  // allTmResults boşsa bile brandNames'ten listeyi oluştur
-  if (allTmResults.length === 0) {
-    brandNames.forEach(brand => {
-      allTmResults.push({ brand, name: brand, source: "—", status: "CLEAR", owner: "", country: "", niceClass: "", totalFound: 0, apiError: true });
-    });
-  }
-
-  // Tüm sonuçları tek listede göster: önce çakışmalar, sonra temizler
-  const sorted = [...conflicts, ...clear];
 
   // Başlık: Çakışmalar
   if (conflicts.length > 0) {
