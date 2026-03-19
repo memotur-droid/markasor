@@ -184,6 +184,23 @@
     height: 3px; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 3px;
   }
 
+  /* Favorites */
+  .fav-star {
+    width: 32px; height: 32px; border-radius: 8px; border: none;
+    background: transparent; cursor: pointer; font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s; flex-shrink: 0;
+  }
+  .fav-star:hover { background: #fef3c7; transform: scale(1.15); }
+  .fav-star.on { background: #fef9c3; }
+  .fav-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--border); }
+  .fav-header h2 { font-family: 'Inter', sans-serif; font-size: 18px; font-weight: 800; color: var(--text); margin: 0; display: flex; align-items: center; gap: 8px; }
+  .fav-count { font-size: 13px; color: var(--accent); font-family: 'JetBrains Mono', monospace; background: #eef2ff; padding: 4px 12px; border-radius: 8px; font-weight: 600; }
+  .fav-empty { padding: 40px 20px; text-align: center; color: var(--muted); font-family: 'Inter', sans-serif; font-size: 14px; }
+  .fav-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .fav-note { font-size: 10px; color: var(--muted); font-family: 'Inter', sans-serif; padding: 0 20px 12px; }
+  .fav-date { font-size: 10px; color: var(--muted); font-family: 'Inter', sans-serif; white-space: nowrap; }
+
   @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes spin { to { transform: rotate(360deg); } }
@@ -437,6 +454,21 @@
     </div>
   </div>
 
+  <!-- FAVORITES SECTION -->
+  <div class="card" id="favSection" style="overflow:hidden; margin-top:20px;">
+    <div class="fav-header">
+      <h2>⭐ Favorilerim <span class="fav-count" id="favCount">0</span></h2>
+      <div class="fav-actions">
+        <button class="btn btn-dim" id="favExportBtn" onclick="exportFavCSV()" style="font-size:11px;padding:6px 14px;">📥 CSV</button>
+        <button class="btn btn-dim" id="favCopyBtn" onclick="copyFavorites()" style="font-size:11px;padding:6px 14px;">📋 Kopyala</button>
+        <button class="btn btn-dim" id="favClearBtn" onclick="clearFavorites()" style="font-size:11px;padding:6px 14px;color:#dc2626;">🗑 Tümünü Sil</button>
+      </div>
+    </div>
+    <div class="scroll-box" id="favList" style="max-height:400px;"></div>
+    <div class="fav-empty" id="favEmpty">Henüz favori eklenmedi. Sonuçlardaki ⭐ butonuna tıklayarak favori ekleyebilirsiniz.</div>
+    <div class="fav-note">💾 Favoriler tarayıcınızda kalıcı olarak saklanır — sayfa kapatılsa bile silinmez.</div>
+  </div>
+
   <!-- TRADEMARK SEARCH SECTION -->
   <div class="card" style="padding:24px; margin-top:20px;" id="trademarkSection">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
@@ -484,6 +516,116 @@ let currentFilter = "all";
 let aborted = false;
 let checking = false;
 let checkStartTime = 0;
+
+// ===================== FAVORITES (localStorage) =====================
+const FAV_KEY = "domdom_favorites";
+
+function loadFavorites() {
+  try { return JSON.parse(localStorage.getItem(FAV_KEY)) || []; } catch { return []; }
+}
+
+function saveFavorites(favs) {
+  localStorage.setItem(FAV_KEY, JSON.stringify(favs));
+}
+
+function isFavorite(domain) {
+  return loadFavorites().some(f => f.domain === domain);
+}
+
+function toggleFavorite(domain, status, info) {
+  let favs = loadFavorites();
+  const idx = favs.findIndex(f => f.domain === domain);
+  if (idx >= 0) {
+    favs.splice(idx, 1);
+  } else {
+    favs.push({ domain, status: status || "unknown", info: info || "", addedAt: new Date().toISOString() });
+  }
+  saveFavorites(favs);
+  renderFavorites();
+  renderResults();
+}
+
+function renderFavorites() {
+  const favs = loadFavorites();
+  const list = document.getElementById("favList");
+  const empty = document.getElementById("favEmpty");
+  const countEl = document.getElementById("favCount");
+
+  countEl.textContent = favs.length;
+
+  if (!favs.length) {
+    list.innerHTML = "";
+    empty.style.display = "block";
+    return;
+  }
+  empty.style.display = "none";
+
+  const colors = {
+    available: { dot:"#059669", bg:"#ecfdf5", border:"#059669", text:"#047857", label:"MÜSAİT" },
+    taken: { dot:"#dc2626", bg:"#fef2f2", border:"#dc2626", text:"#b91c1c", label:"KAYITLI" },
+    error: { dot:"#d97706", bg:"#fffbeb", border:"#d97706", text:"#b45309", label:"BELİRSİZ" },
+    unknown: { dot:"#9ca3af", bg:"#f3f4f6", border:"#9ca3af", text:"#6b7280", label:"—" }
+  };
+
+  list.innerHTML = "";
+  favs.forEach(f => {
+    const c = colors[f.status] || colors.unknown;
+    const addedDate = f.addedAt ? new Date(f.addedAt).toLocaleDateString("tr-TR", { day:"numeric", month:"short", year:"numeric", hour:"2-digit", minute:"2-digit" }) : "";
+    const row = document.createElement("div");
+    row.className = "row";
+    row.innerHTML = `
+      <div class="dot" style="background:${c.dot}"></div>
+      <div style="flex:1;min-width:0">
+        <div class="row-domain">${f.domain}</div>
+        <div class="row-info">${f.info || "—"}</div>
+      </div>
+      <span class="fav-date">${addedDate}</span>
+      <div class="badge" style="background:${c.bg};color:${c.text};border:1px solid ${c.border}25">${c.label}</div>
+      <button class="fav-star on" onclick="toggleFavorite('${f.domain}')" title="Favoriden çıkar">⭐</button>
+    `;
+    list.appendChild(row);
+  });
+}
+
+function clearFavorites() {
+  const favs = loadFavorites();
+  if (!favs.length) return;
+  if (!confirm("Tüm favoriler silinecek. Emin misiniz?")) return;
+  saveFavorites([]);
+  renderFavorites();
+  renderResults();
+}
+
+function exportFavCSV() {
+  const favs = loadFavorites();
+  if (!favs.length) return;
+  const bom = "\uFEFF";
+  const csv = bom + "Domain,Durum,Eklenme Tarihi,Detay\n" + favs.map(f => {
+    const statusLabel = f.status === "available" ? "Müsait" : f.status === "taken" ? "Kayıtlı" : f.status === "error" ? "Belirsiz" : "—";
+    const dateStr = f.addedAt ? new Date(f.addedAt).toLocaleDateString("tr-TR") : "";
+    return '"' + f.domain + '","' + statusLabel + '","' + dateStr + '","' + (f.info || "").replace(/"/g, '""') + '"';
+  }).join("\n");
+  const blob = new Blob([csv], { type:"text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = "favoriler.csv"; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function copyFavorites() {
+  const favs = loadFavorites();
+  if (!favs.length) return;
+  const text = favs.map(f => f.domain).join("\n");
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById("favCopyBtn");
+    const old = btn.textContent;
+    btn.textContent = "✓ Kopyalandı!";
+    setTimeout(() => btn.textContent = old, 1500);
+  });
+}
+
+// Init favorites on load
+document.addEventListener("DOMContentLoaded", () => renderFavorites());
 
 // ===================== TLD CHIPS =====================
 const tldRow = document.getElementById("tldRow");
@@ -1335,7 +1477,10 @@ function renderResults() {
 
     const row = document.createElement("div");
     row.className = "row";
-    row.innerHTML = `<div class="dot" style="background:${c.dot}"></div><div style="flex:1;min-width:0"><div style="display:flex;align-items:center;flex-wrap:wrap;"><span class="row-domain">${r.domain}</span>${expiryBadge}</div><div class="row-info">${r.info}</div></div><div class="badge" style="background:${c.bg};color:${c.text};border:1px solid ${c.border}25">${c.label}</div>`;
+    const isFav = isFavorite(r.domain);
+    const escapedDomain = r.domain.replace(/'/g, "\\'");
+    const escapedInfo = (r.info || "").replace(/'/g, "\\'").replace(/"/g, "&quot;");
+    row.innerHTML = `<button class="fav-star${isFav ? ' on' : ''}" onclick="toggleFavorite('${escapedDomain}','${r.status}','${escapedInfo}')" title="${isFav ? 'Favoriden çıkar' : 'Favoriye ekle'}">${isFav ? '⭐' : '☆'}</button><div class="dot" style="background:${c.dot}"></div><div style="flex:1;min-width:0"><div style="display:flex;align-items:center;flex-wrap:wrap;"><span class="row-domain">${r.domain}</span>${expiryBadge}</div><div class="row-info">${r.info}</div></div><div class="badge" style="background:${c.bg};color:${c.text};border:1px solid ${c.border}25">${c.label}</div>`;
     list.appendChild(row);
   });
 
@@ -1437,6 +1582,7 @@ function copyAvailable() {
 }
 
 updatePreview();
+renderFavorites();
 
 // ===================== TRADEMARK SEARCH =====================
 
