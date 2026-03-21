@@ -201,6 +201,35 @@
   .fav-note { font-size: 10px; color: var(--muted); font-family: 'Inter', sans-serif; padding: 0 20px 12px; }
   .fav-date { font-size: 10px; color: var(--muted); font-family: 'Inter', sans-serif; white-space: nowrap; }
 
+  /* Auth */
+  .auth-bar {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    margin-bottom: 20px; flex-wrap: wrap;
+  }
+  .auth-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 9px 20px; border-radius: 12px; border: 1.5px solid var(--border);
+    background: #fff; color: var(--text); font-family: 'Inter', sans-serif;
+    font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+  }
+  .auth-btn:hover { border-color: #a5b4fc; background: #f9fafb; box-shadow: var(--shadow); }
+  .auth-btn img { width: 18px; height: 18px; }
+  .auth-user {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 13px; color: var(--dim); font-family: 'Inter', sans-serif;
+  }
+  .auth-user img { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--border); }
+  .auth-logout {
+    padding: 6px 14px; border-radius: 10px; border: 1px solid var(--border);
+    background: #fff; color: var(--dim); font-family: 'Inter', sans-serif;
+    font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+  }
+  .auth-logout:hover { background: #fef2f2; color: #dc2626; border-color: #fca5a5; }
+  .sync-badge {
+    font-size: 11px; color: var(--accent); font-family: 'Inter', sans-serif;
+    background: #eef2ff; padding: 4px 10px; border-radius: 8px; font-weight: 600;
+  }
+
   @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes spin { to { transform: rotate(360deg); } }
@@ -222,6 +251,22 @@
       <h1>Domain Agent</h1>
     </div>
     <p>Toplu domain üretici & müsaitlik kontrolü — Binlerce domain, saniyeler içinde</p>
+  </div>
+
+  <!-- Auth Bar -->
+  <div class="auth-bar" id="authBar">
+    <button class="auth-btn" id="loginBtn" onclick="googleLogin()">
+      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G">
+      Google ile Giriş Yap
+    </button>
+    <div id="userInfo" style="display:none;">
+      <span class="auth-user">
+        <img id="userPhoto" src="" alt="">
+        <span id="userName"></span>
+      </span>
+      <span class="sync-badge" id="syncStatus">☁️ Senkron</span>
+      <button class="auth-logout" onclick="googleLogout()">Çıkış</button>
+    </div>
   </div>
 
   <div class="mode-center">
@@ -466,7 +511,7 @@
     </div>
     <div class="scroll-box" id="favList" style="max-height:400px;"></div>
     <div class="fav-empty" id="favEmpty">Henüz favori eklenmedi. Sonuçlardaki ⭐ butonuna tıklayarak favori ekleyebilirsiniz.</div>
-    <div class="fav-note">💾 Favoriler tarayıcınızda kalıcı olarak saklanır — sayfa kapatılsa bile silinmez.</div>
+    <div class="fav-note" id="favNote">💾 Favoriler tarayıcınızda kalıcı olarak saklanır. Cihazlar arası senkron için Google ile giriş yapın.</div>
   </div>
 
   <!-- TRADEMARK SEARCH SECTION -->
@@ -507,6 +552,11 @@
   <div class="footer">RDAP (registry) + Google DNS + Cloudflare DNS · WIPO Global Brand Database · Türkpatent + USPTO + EUIPO</div>
 </div>
 
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
 <script>
 // ===================== STATE =====================
 const TLD_OPTIONS = [".com",".net",".org",".io",".dev",".co",".app",".xyz",".ai",".tech",".me",".info"];
@@ -517,30 +567,189 @@ let aborted = false;
 let checking = false;
 let checkStartTime = 0;
 
-// ===================== FAVORITES (localStorage) =====================
+// ===================== FIREBASE CONFIG =====================
+// TODO: Firebase Console'dan kendi config değerlerini buraya yapıştır
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+
+let firebaseReady = false;
+let db = null;
+let auth = null;
+let currentUser = null;
+let cloudFavs = null; // cached cloud favorites
+
+function initFirebase() {
+  if (firebaseConfig.apiKey === "YOUR_API_KEY") {
+    console.warn("Firebase config not set — running in localStorage-only mode");
+    return;
+  }
+  try {
+    firebase.initializeApp(firebaseConfig);
+    auth = firebase.auth();
+    db = firebase.firestore();
+    firebaseReady = true;
+
+    auth.onAuthStateChanged(async (user) => {
+      currentUser = user;
+      updateAuthUI();
+      if (user) {
+        await syncFromCloud();
+      } else {
+        cloudFavs = null;
+      }
+      renderFavorites();
+      renderResults();
+    });
+  } catch (e) {
+    console.error("Firebase init error:", e);
+  }
+}
+
+function updateAuthUI() {
+  const loginBtn = document.getElementById("loginBtn");
+  const userInfo = document.getElementById("userInfo");
+  const favNote = document.getElementById("favNote");
+
+  if (currentUser) {
+    loginBtn.style.display = "none";
+    userInfo.style.display = "flex";
+    document.getElementById("userPhoto").src = currentUser.photoURL || "";
+    document.getElementById("userName").textContent = currentUser.displayName || currentUser.email;
+    favNote.textContent = "☁️ Favoriler Google hesabınızla senkronize — tüm cihazlarınızda erişebilirsiniz.";
+  } else {
+    loginBtn.style.display = "inline-flex";
+    userInfo.style.display = "none";
+    favNote.textContent = "💾 Favoriler tarayıcınızda kalıcı olarak saklanır. Cihazlar arası senkron için Google ile giriş yapın.";
+  }
+
+  if (!firebaseReady) {
+    loginBtn.style.display = "none";
+  }
+}
+
+async function googleLogin() {
+  if (!firebaseReady) return;
+  try {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    await auth.signInWithPopup(provider);
+  } catch (e) {
+    if (e.code !== "auth/popup-closed-by-user") {
+      alert("Giriş hatası: " + e.message);
+    }
+  }
+}
+
+async function googleLogout() {
+  if (!firebaseReady || !auth) return;
+  await auth.signOut();
+  cloudFavs = null;
+  renderFavorites();
+  renderResults();
+}
+
+function getUserFavRef() {
+  if (!firebaseReady || !currentUser) return null;
+  return db.collection("users").doc(currentUser.uid).collection("favorites");
+}
+
+async function syncFromCloud() {
+  const ref = getUserFavRef();
+  if (!ref) return;
+  const syncStatus = document.getElementById("syncStatus");
+  syncStatus.textContent = "⏳ Senkron...";
+
+  try {
+    const snap = await ref.orderBy("addedAt", "desc").get();
+    cloudFavs = [];
+    snap.forEach(doc => cloudFavs.push({ id: doc.id, ...doc.data() }));
+
+    // Merge localStorage favorites into cloud (first-time sync)
+    const localFavs = getLocalFavorites();
+    if (localFavs.length > 0) {
+      const cloudDomains = new Set(cloudFavs.map(f => f.domain));
+      const newOnes = localFavs.filter(f => !cloudDomains.has(f.domain));
+      if (newOnes.length > 0) {
+        const batch = db.batch();
+        for (const f of newOnes) {
+          const docRef = ref.doc();
+          batch.set(docRef, { domain: f.domain, status: f.status || "unknown", info: f.info || "", addedAt: f.addedAt || new Date().toISOString() });
+          cloudFavs.push({ id: docRef.id, ...f });
+        }
+        await batch.commit();
+      }
+      // Clear localStorage after successful merge
+      localStorage.removeItem(FAV_KEY);
+    }
+    syncStatus.textContent = "☁️ Senkron";
+  } catch (e) {
+    console.error("Sync error:", e);
+    syncStatus.textContent = "⚠️ Hata";
+  }
+}
+
+// ===================== FAVORITES =====================
 const FAV_KEY = "domdom_favorites";
 
-function loadFavorites() {
+function getLocalFavorites() {
   try { return JSON.parse(localStorage.getItem(FAV_KEY)) || []; } catch { return []; }
 }
 
-function saveFavorites(favs) {
+function loadFavorites() {
+  if (currentUser && cloudFavs !== null) return cloudFavs;
+  return getLocalFavorites();
+}
+
+function saveFavoritesLocal(favs) {
   localStorage.setItem(FAV_KEY, JSON.stringify(favs));
+}
+
+async function saveFavorites(favs) {
+  if (currentUser && firebaseReady) {
+    // Cloud save handled per-operation (add/remove)
+    cloudFavs = favs;
+  } else {
+    saveFavoritesLocal(favs);
+  }
 }
 
 function isFavorite(domain) {
   return loadFavorites().some(f => f.domain === domain);
 }
 
-function toggleFavorite(domain, status, info) {
+async function toggleFavorite(domain, status, info) {
   let favs = loadFavorites();
   const idx = favs.findIndex(f => f.domain === domain);
+
   if (idx >= 0) {
+    const removed = favs[idx];
     favs.splice(idx, 1);
+    // Remove from cloud
+    if (currentUser && firebaseReady && removed.id) {
+      const ref = getUserFavRef();
+      if (ref) ref.doc(removed.id).delete().catch(e => console.error("Delete error:", e));
+    }
   } else {
-    favs.push({ domain, status: status || "unknown", info: info || "", addedAt: new Date().toISOString() });
+    const newFav = { domain, status: status || "unknown", info: info || "", addedAt: new Date().toISOString() };
+    // Add to cloud
+    if (currentUser && firebaseReady) {
+      const ref = getUserFavRef();
+      if (ref) {
+        try {
+          const docRef = await ref.add(newFav);
+          newFav.id = docRef.id;
+        } catch (e) { console.error("Add error:", e); }
+      }
+    }
+    favs.push(newFav);
   }
-  saveFavorites(favs);
+
+  await saveFavorites(favs);
   renderFavorites();
   renderResults();
 }
@@ -571,6 +780,7 @@ function renderFavorites() {
   favs.forEach(f => {
     const c = colors[f.status] || colors.unknown;
     const addedDate = f.addedAt ? new Date(f.addedAt).toLocaleDateString("tr-TR", { day:"numeric", month:"short", year:"numeric", hour:"2-digit", minute:"2-digit" }) : "";
+    const escapedDomain = f.domain.replace(/'/g, "\\'");
     const row = document.createElement("div");
     row.className = "row";
     row.innerHTML = `
@@ -581,17 +791,32 @@ function renderFavorites() {
       </div>
       <span class="fav-date">${addedDate}</span>
       <div class="badge" style="background:${c.bg};color:${c.text};border:1px solid ${c.border}25">${c.label}</div>
-      <button class="fav-star on" onclick="toggleFavorite('${f.domain}')" title="Favoriden çıkar">⭐</button>
+      <button class="fav-star on" onclick="toggleFavorite('${escapedDomain}')" title="Favoriden çıkar">⭐</button>
     `;
     list.appendChild(row);
   });
 }
 
-function clearFavorites() {
+async function clearFavorites() {
   const favs = loadFavorites();
   if (!favs.length) return;
   if (!confirm("Tüm favoriler silinecek. Emin misiniz?")) return;
-  saveFavorites([]);
+
+  // Clear cloud
+  if (currentUser && firebaseReady) {
+    const ref = getUserFavRef();
+    if (ref) {
+      try {
+        const snap = await ref.get();
+        const batch = db.batch();
+        snap.forEach(doc => batch.delete(doc.ref));
+        await batch.commit();
+      } catch (e) { console.error("Clear error:", e); }
+    }
+  }
+
+  await saveFavorites([]);
+  saveFavoritesLocal([]); // also clear local
   renderFavorites();
   renderResults();
 }
@@ -625,7 +850,11 @@ function copyFavorites() {
 }
 
 // Init favorites on load
-document.addEventListener("DOMContentLoaded", () => renderFavorites());
+document.addEventListener("DOMContentLoaded", () => {
+  initFirebase();
+  updateAuthUI();
+  renderFavorites();
+});
 
 // ===================== TLD CHIPS =====================
 const tldRow = document.getElementById("tldRow");
@@ -1187,7 +1416,21 @@ async function checkDomain(domain) {
         }
       }
 
-      if (nsData.Status === 0) {
+      // Status 0 + cevap yok → Cloudflare ile çapraz doğrula
+      if (nsData.Status === 0 && (!nsData.Answer || nsData.Answer.length === 0)) {
+        try {
+          const ctrlCf = new AbortController();
+          const tCf = setTimeout(() => ctrlCf.abort(), 4000);
+          const cfResp2 = await fetch("https://cloudflare-dns.com/dns-query?name=" + encodeURIComponent(clean) + "&type=NS", {
+            signal: ctrlCf.signal, headers: { "Accept": "application/dns-json" }
+          });
+          clearTimeout(tCf);
+          if (cfResp2.ok) {
+            const cfData2 = await cfResp2.json();
+            if (cfData2.Status === 3) return { domain: clean, status: "available", info: "✓ Müsait — DNS çapraz doğrulandı (Google+CF)", expiryDate: null, regDate: null };
+            if (cfData2.Status === 0 && (!cfData2.Answer || cfData2.Answer.length === 0)) return { domain: clean, status: "available", info: "⚠ Muhtemelen müsait — Her iki DNS'te de kayıt yok", expiryDate: null, regDate: null };
+          }
+        } catch {}
         return { domain: clean, status: "error", info: "Belirsiz — RDAP ulaşılamadı, DNS belirsiz", expiryDate: null, regDate: null };
       }
     }
@@ -1223,6 +1466,20 @@ async function quickDnsCheck(domain) {
       if (data.Answer && data.Answer.length > 0) return "exists";
     }
   } catch {}
+  // A kaydı belirsizse NS ile de dene (Cloudflare)
+  try {
+    const ctrl2 = new AbortController();
+    const t2 = setTimeout(() => ctrl2.abort(), 4000);
+    const resp2 = await fetch("https://cloudflare-dns.com/dns-query?name=" + encodeURIComponent(domain) + "&type=NS", {
+      signal: ctrl2.signal, headers: { "Accept": "application/dns-json" }
+    });
+    clearTimeout(t2);
+    if (resp2.ok) {
+      const data2 = await resp2.json();
+      if (data2.Status === 3) return "nxdomain";
+      if (data2.Answer && data2.Answer.length > 0) return "exists";
+    }
+  } catch {}
   return "unknown";
 }
 
@@ -1246,9 +1503,34 @@ async function dnsOnlyCheck(domain) {
         return { domain, status: "taken", info: "Kayıtlı (DNS)" + (nsList ? " · NS: " + nsList : ""), expiryDate: null, regDate: null };
       }
       if (data.Authority && data.Authority.length > 0) {
-        return { domain, status: "taken", info: "Kayıtlı (Authority)", expiryDate: null, regDate: null };
+        const soaRec = data.Authority.find(a => a.type === 6);
+        if (soaRec) {
+          const soaName = (soaRec.name || "").replace(/\.$/, "").toLowerCase();
+          if (soaName === domain) {
+            return { domain, status: "taken", info: "Kayıtlı (SOA mevcut)", expiryDate: null, regDate: null };
+          }
+        }
+        // Authority TLD'ye ait, domain'e değil — muhtemelen müsait
       }
-      if (data.Status === 0) return { domain, status: "available", info: "⚠ Muhtemelen müsait — DNS boş", expiryDate: null, regDate: null };
+      if (data.Status === 0 && (!data.Answer || data.Answer.length === 0)) {
+        // İkinci DNS ile çapraz doğrula
+        try {
+          const dnsUrl2 = !useGoogle
+            ? "https://dns.google/resolve?name=" + encodeURIComponent(domain) + "&type=NS"
+            : "https://cloudflare-dns.com/dns-query?name=" + encodeURIComponent(domain) + "&type=NS";
+          const headers2 = !useGoogle ? {} : { "Accept": "application/dns-json" };
+          const ctrlX = new AbortController();
+          const tX = setTimeout(() => ctrlX.abort(), 4000);
+          const respX = await fetch(dnsUrl2, { signal: ctrlX.signal, headers: headers2 });
+          clearTimeout(tX);
+          if (respX.ok) {
+            const dataX = await respX.json();
+            if (dataX.Status === 3) return { domain, status: "available", info: "✓ Müsait — DNS çapraz doğrulandı", expiryDate: null, regDate: null };
+            if (dataX.Status === 0 && (!dataX.Answer || dataX.Answer.length === 0)) return { domain, status: "available", info: "⚠ Muhtemelen müsait — Her iki DNS'te de kayıt yok", expiryDate: null, regDate: null };
+          }
+        } catch {}
+        return { domain, status: "available", info: "⚠ Muhtemelen müsait — DNS boş", expiryDate: null, regDate: null };
+      }
     }
   } catch {}
 
@@ -1693,5 +1975,6 @@ function searchTrademark() {
   listDiv.appendChild(row);
 }
 </script>
+
 </body>
 </html>
