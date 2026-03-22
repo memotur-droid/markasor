@@ -1370,6 +1370,8 @@ function generateAIDomains() {
     document.getElementById("domainInput").value = names.join("\n");
     setMode("list");
     updateDomainCount();
+  } else {
+    alert("Sonuç bulunamadı. Farklı bir kelime deneyin.\nÖrnek kategoriler: hayvan, teknoloji, yemek, sağlık, finans, eğitim, sanat, seyahat, spor, doğa");
   }
 
   btn.disabled = false; btn.textContent = "🤖 Üret";
