@@ -453,7 +453,6 @@
     <div class="actions" style="margin-top:10px;">
       <button class="btn btn-go" id="startBtn" onclick="startCheck()">🔍 Kontrol Başlat</button>
       <button class="btn btn-stop hidden" id="stopBtn" onclick="stopCheck()">⏹ Durdur</button>
-      <button class="btn btn-dim" onclick="loadSample()">Örnek Yükle</button>
       <button class="btn btn-dim" onclick="document.getElementById('domainInput').value='';updateDomainCount();">🗑️ Listeyi Temizle</button>
       <span id="domainCountBadge" style="font-size:14px;color:#4f46e5;font-weight:600;font-family:'Inter',sans-serif"></span>
       <button class="btn btn-dim hidden" id="csvBtn" onclick="exportCSV()" style="margin-left:auto;">📥 CSV</button>
@@ -888,10 +887,6 @@ function setMode(m) {
   if (m === "generate") updatePreview();
 }
 
-function loadSample() {
-  document.getElementById("domainInput").value = "google.com\nacme-startup.com\nmy-awesome-project.io\nxyznotexist12345.com\nblockchain-ai-saas.dev\nturkiye-dijital.net";
-  updateDomainCount();
-}
 
 // ===================== BRUTE FORCE GENERATOR =====================
 const VOWELS = "aeiou";
