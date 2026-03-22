@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #f5f5f7;
+    --bg: #f0f2f5;
     --card: #ffffff;
     --border: #e5e7eb;
     --text: #111827;
@@ -25,38 +25,38 @@
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; min-height: 100vh; -webkit-font-smoothing: antialiased; }
-  .wrap { max-width: 960px; margin: 0 auto; padding: 40px 24px; }
+  .wrap { max-width: 1060px; margin: 0 auto; padding: 28px 20px; }
 
   /* Header */
-  .header { text-align: center; margin-bottom: 40px; }
-  .header-row { display: inline-flex; align-items: center; gap: 14px; margin-bottom: 8px; }
+  .header { text-align: center; margin-bottom: 20px; }
+  .header-row { display: inline-flex; align-items: center; gap: 12px; margin-bottom: 4px; }
   .logo {
-    width: 52px; height: 52px; border-radius: 16px;
+    width: 40px; height: 40px; border-radius: 12px;
     background: linear-gradient(135deg, var(--accent), var(--accent2));
     display: flex; align-items: center; justify-content: center;
-    font-size: 24px; font-weight: 900; color: #fff;
+    font-size: 20px; font-weight: 900; color: #fff;
     font-family: 'Inter', sans-serif;
-    box-shadow: 0 6px 20px rgba(79,70,229,0.25);
+    box-shadow: 0 4px 14px rgba(79,70,229,0.25);
   }
   .header h1 {
-    font-family: 'Inter', sans-serif; font-size: 36px; font-weight: 900;
+    font-family: 'Inter', sans-serif; font-size: 28px; font-weight: 900;
     color: var(--text); letter-spacing: -0.5px;
   }
-  .header p { color: var(--dim); font-size: 15px; font-family: 'Inter', sans-serif; margin-top: 4px; font-weight: 400; }
+  .header p { color: var(--dim); font-size: 13px; font-family: 'Inter', sans-serif; margin-top: 2px; font-weight: 400; }
 
   /* Card */
   .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); }
 
   /* Mode Switch */
-  .mode-center { display: flex; justify-content: center; margin-bottom: 24px; }
+  .mode-center { display: flex; justify-content: center; margin-bottom: 16px; }
   .mode-sw {
     display: inline-flex; background: #e5e7eb;
-    border-radius: 14px; padding: 4px; border: none;
+    border-radius: 12px; padding: 3px; border: none;
   }
   .mode-b {
-    padding: 10px 24px; border-radius: 11px; border: none;
+    padding: 8px 20px; border-radius: 10px; border: none;
     background: transparent; color: var(--dim);
-    font-family: 'Inter', sans-serif; font-size: 14px;
+    font-family: 'Inter', sans-serif; font-size: 13px;
     font-weight: 600; cursor: pointer; transition: all 0.2s;
   }
   .mode-b.on { background: #fff; color: var(--accent); box-shadow: var(--shadow-md); }
@@ -120,20 +120,20 @@
   .tab:hover { color: var(--text); background: #f9fafb; }
 
   /* Stats */
-  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
-  .stat-card { padding: 22px 16px; text-align: center; }
-  .stat-num { font-family: 'JetBrains Mono', monospace; font-size: 32px; font-weight: 700; line-height: 1; }
-  .stat-label { font-size: 11px; color: var(--dim); margin-top: 6px; font-family: 'Inter', sans-serif; text-transform: uppercase; letter-spacing: 1.2px; font-weight: 700; }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
+  .stat-card { padding: 16px 12px; text-align: center; }
+  .stat-num { font-family: 'JetBrains Mono', monospace; font-size: 26px; font-weight: 700; line-height: 1; }
+  .stat-label { font-size: 10px; color: var(--dim); margin-top: 5px; font-family: 'Inter', sans-serif; text-transform: uppercase; letter-spacing: 1.2px; font-weight: 700; }
 
   /* Scroll / Results */
-  .scroll-box { max-height: 500px; overflow-y: auto; }
+  .scroll-box { max-height: 600px; overflow-y: auto; }
   .scroll-box::-webkit-scrollbar { width: 6px; }
   .scroll-box::-webkit-scrollbar-track { background: #fafafa; }
   .scroll-box::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
   .scroll-box::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
   .row {
-    display: flex; align-items: center; padding: 14px 18px;
-    border-bottom: 1px solid #f3f4f6; gap: 14px; transition: background 0.15s;
+    display: flex; align-items: center; padding: 10px 16px;
+    border-bottom: 1px solid #f3f4f6; gap: 12px; transition: background 0.15s;
   }
   .row:last-child { border-bottom: none; }
   .row:hover { background: #f9fafb; }
@@ -153,8 +153,20 @@
   /* Labels */
   .label { font-size: 14px; color: var(--dim); margin-bottom: 8px; font-family: 'Inter', sans-serif; font-weight: 500; }
   .label-sm { font-size: 11px; color: var(--muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1.5px; font-family: 'Inter', sans-serif; font-weight: 700; }
-  .actions { display: flex; gap: 10px; margin-top: 18px; align-items: center; flex-wrap: wrap; }
-  .footer { text-align: center; margin-top: 36px; font-size: 12px; color: var(--muted); font-family: 'Inter', sans-serif; }
+  .actions { display: flex; gap: 8px; margin-top: 14px; align-items: center; flex-wrap: wrap; }
+  .footer { text-align: center; margin-top: 28px; font-size: 11px; color: var(--muted); font-family: 'Inter', sans-serif; }
+
+  /* Collapsible settings */
+  .settings-toggle {
+    display: flex; align-items: center; gap: 6px; cursor: pointer;
+    font-size: 12px; color: var(--dim); font-family: 'Inter', sans-serif;
+    font-weight: 600; padding: 6px 0; user-select: none; transition: color 0.2s;
+  }
+  .settings-toggle:hover { color: var(--accent); }
+  .settings-toggle .arrow { transition: transform 0.2s; display: inline-block; font-size: 10px; }
+  .settings-toggle .arrow.open { transform: rotate(90deg); }
+  .settings-body { overflow: hidden; transition: max-height 0.3s ease; max-height: 0; }
+  .settings-body.open { max-height: 500px; }
   .hidden { display: none; }
 
   /* Generator */
@@ -204,7 +216,7 @@
   /* Auth */
   .auth-bar {
     display: flex; align-items: center; justify-content: center; gap: 10px;
-    margin-bottom: 20px; flex-wrap: wrap;
+    margin-bottom: 14px; flex-wrap: wrap;
   }
   .auth-btn {
     display: inline-flex; align-items: center; gap: 8px;
@@ -236,10 +248,19 @@
   .spinner { width: 12px; height: 12px; border: 2.5px solid var(--accent); border-top-color: transparent; border-radius: 50%; animation: spin 0.6s linear infinite; display: inline-block; }
 
   @media (max-width: 640px) {
-    .stats { grid-template-columns: repeat(2, 1fr); }
+    .wrap { padding: 16px 12px; }
+    .stats { grid-template-columns: repeat(2, 1fr); gap: 8px; }
     .gen-grid { grid-template-columns: 1fr; }
-    .header h1 { font-size: 26px; }
-    .mode-b { padding: 8px 16px; font-size: 13px; }
+    .header h1 { font-size: 22px; }
+    .header-row { gap: 8px; }
+    .logo { width: 34px; height: 34px; font-size: 16px; border-radius: 10px; }
+    .mode-b { padding: 7px 14px; font-size: 12px; }
+    .stat-num { font-size: 22px; }
+    .btn { padding: 10px 18px; font-size: 13px; }
+    .row { padding: 8px 12px; gap: 8px; }
+    .row-domain { font-size: 12px; }
+    .fav-header { padding: 12px 14px; }
+    .fav-header h2 { font-size: 15px; }
   }
 </style>
 </head>
@@ -278,7 +299,7 @@
     </div>
   </div>
 
-  <div class="card" style="padding:24px; margin-bottom:20px;">
+  <div class="card" style="padding:20px; margin-bottom:16px;">
 
     <!-- Engelli Harfler — tüm üreticiler için ortak -->
     <div id="excludeSection" class="hidden" style="margin-bottom:16px;padding:12px 16px;background:#fef3c7;border:1px solid #fbbf24;border-radius:12px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
@@ -419,38 +440,45 @@
     </div>
 
     <!-- SHARED: TLD + Actions -->
-    <div style="margin-top:12px;">
+    <div style="margin-top:10px;">
       <div class="label-sm">TLD uzantıları</div>
       <div class="tld-row" id="tldRow"></div>
     </div>
 
-    <!-- Speed Controls -->
-    <div style="margin-top:10px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
-      <div style="display:flex;align-items:center;gap:5px;">
-        <span class="gen-label" style="min-width:auto;">⚡ Hız:</span>
-        <select id="speedMode" style="font-size:13px;padding:8px 12px;background:#fff;border:1.5px solid #e5e7eb;border-radius:10px;color:#374151;font-family:'Inter',sans-serif;cursor:pointer;outline:none;">
-          <option value="slow">Yavaş (2 paralel, 800ms)</option>
-          <option value="normal" selected>Normal (5 paralel, 400ms)</option>
-          <option value="fast">Hızlı (10 paralel, 200ms)</option>
-          <option value="turbo">Turbo (15 paralel, 100ms)</option>
-          <option value="max">Maksimum (25 paralel, 50ms)</option>
-        </select>
+    <!-- Collapsible Settings -->
+    <div style="margin-top:8px;">
+      <div class="settings-toggle" onclick="this.querySelector('.arrow').classList.toggle('open');this.nextElementSibling.classList.toggle('open');">
+        <span class="arrow">▶</span> Gelişmiş Ayarlar
       </div>
-      <div style="display:flex;align-items:center;gap:5px;">
-        <span class="gen-label" style="min-width:auto;">🌐 DNS:</span>
-        <select id="dnsMode" style="font-size:13px;padding:8px 12px;background:#fff;border:1.5px solid #e5e7eb;border-radius:10px;color:#374151;font-family:'Inter',sans-serif;cursor:pointer;outline:none;">
-          <option value="auto" selected>Otomatik (RDAP → Google → CF)</option>
-          <option value="dns_only">Sadece DNS (hızlı, daha az detay)</option>
-          <option value="rdap_only">Sadece RDAP (yavaş, en detaylı)</option>
-        </select>
-      </div>
-      <div class="checkbox-row" style="margin-left:4px;">
-        <input type="checkbox" id="autoTmCheck" checked>
-        <label for="autoTmCheck" style="font-size:10.5px;">🏛️ Müsaitlerin markasını otomatik sorgula</label>
+      <div class="settings-body">
+        <div style="padding:10px 0;display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;gap:5px;">
+            <span class="gen-label" style="min-width:auto;font-size:12px;">⚡ Hız:</span>
+            <select id="speedMode" style="font-size:12px;padding:7px 10px;background:#fff;border:1.5px solid #e5e7eb;border-radius:10px;color:#374151;font-family:'Inter',sans-serif;cursor:pointer;outline:none;">
+              <option value="slow">Yavaş (2 paralel)</option>
+              <option value="normal" selected>Normal (5 paralel)</option>
+              <option value="fast">Hızlı (10 paralel)</option>
+              <option value="turbo">Turbo (15 paralel)</option>
+              <option value="max">Maksimum (25 paralel)</option>
+            </select>
+          </div>
+          <div style="display:flex;align-items:center;gap:5px;">
+            <span class="gen-label" style="min-width:auto;font-size:12px;">🌐 DNS:</span>
+            <select id="dnsMode" style="font-size:12px;padding:7px 10px;background:#fff;border:1.5px solid #e5e7eb;border-radius:10px;color:#374151;font-family:'Inter',sans-serif;cursor:pointer;outline:none;">
+              <option value="auto" selected>Otomatik (RDAP → Google → CF)</option>
+              <option value="dns_only">Sadece DNS (hızlı)</option>
+              <option value="rdap_only">Sadece RDAP (detaylı)</option>
+            </select>
+          </div>
+          <div class="checkbox-row">
+            <input type="checkbox" id="autoTmCheck" checked>
+            <label for="autoTmCheck" style="font-size:11px;">🏛️ Müsaitlerin markasını otomatik sorgula</label>
+          </div>
+        </div>
       </div>
     </div>
 
-    <div class="actions" style="margin-top:10px;">
+    <div class="actions" style="margin-top:8px;">
       <button class="btn btn-go" id="startBtn" onclick="startCheck()">🔍 Kontrol Başlat</button>
       <button class="btn btn-stop hidden" id="stopBtn" onclick="stopCheck()">⏹ Durdur</button>
       <button class="btn btn-dim" onclick="document.getElementById('domainInput').value='';updateDomainCount();">🗑️ Listeyi Temizle</button>
@@ -504,7 +532,7 @@
   </div>
 
   <!-- FAVORITES SECTION -->
-  <div class="card" id="favSection" style="overflow:hidden; margin-top:20px;">
+  <div class="card" id="favSection" style="overflow:hidden; margin-top:14px;">
     <div class="fav-header">
       <h2>⭐ Favorilerim <span class="fav-count" id="favCount">0</span></h2>
       <div class="fav-actions">
@@ -519,7 +547,7 @@
   </div>
 
   <!-- TRADEMARK SEARCH SECTION -->
-  <div class="card" style="padding:24px; margin-top:20px;" id="trademarkSection">
+  <div class="card" style="padding:20px; margin-top:14px;" id="trademarkSection">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
       <span style="font-size:18px;">🏛️</span>
       <h2 style="font-family:'Inter',sans-serif;font-size:20px;font-weight:800;color:#111827;margin:0;">Marka Sorgulama</h2>
