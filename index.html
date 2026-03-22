@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Domain Agent — Toplu Domain Kontrol</title>
+<title>Markasor — Domain & Marka Sorgulama</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -268,10 +268,10 @@
 <div class="wrap">
   <div class="header">
     <div class="header-row">
-      <div class="logo">D</div>
-      <h1>Domain Agent</h1>
+      <div class="logo">M</div>
+      <h1>Markasor</h1>
     </div>
-    <p>Toplu domain üretici & müsaitlik kontrolü — Binlerce domain, saniyeler içinde</p>
+    <p>Domain üretici & müsaitlik kontrolü + marka sorgulama — Binlerce domain, saniyeler içinde</p>
   </div>
 
   <!-- Auth Bar -->
@@ -726,7 +726,7 @@ async function syncFromCloud() {
 }
 
 // ===================== FAVORITES =====================
-const FAV_KEY = "domdom_favorites";
+const FAV_KEY = "markasor_favorites";
 
 function getLocalFavorites() {
   try { return JSON.parse(localStorage.getItem(FAV_KEY)) || []; } catch { return []; }
