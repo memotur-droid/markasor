@@ -285,6 +285,10 @@
       <span style="font-weight:600;font-size:13px;color:#92400e;">🚫 Engelli harfler:</span>
       <input type="text" class="small-input" id="globalExclude" placeholder="örn: qwx" style="width:160px;font-family:'JetBrains Mono',monospace;letter-spacing:2px;" oninput="updatePreview()">
       <span style="font-size:12px;color:#92400e;" id="excludeInfo">Bu harfler tüm üreticilerde devre dışı kalır</span>
+      <div class="checkbox-row" style="margin-left:auto;">
+        <input type="checkbox" id="noTripleCheck" onchange="updatePreview()">
+        <label for="noTripleCheck" style="font-size:12px;color:#92400e;">3 ardışık sesli/sessiz harf engelle</label>
+      </div>
     </div>
 
     <!-- GENERATOR SECTION -->
@@ -900,6 +904,22 @@ function filterChars(str, excluded) {
   return str.split("").filter(c => !excluded.includes(c)).join("");
 }
 
+function hasTripleVowelConsonant(word) {
+  const v = "aeiou";
+  let vc = 0, cc = 0;
+  for (const ch of word) {
+    if (v.includes(ch)) { vc++; cc = 0; }
+    else if (ch >= "a" && ch <= "z") { cc++; vc = 0; }
+    else { vc = 0; cc = 0; }
+    if (vc >= 3 || cc >= 3) return true;
+  }
+  return false;
+}
+
+function isNoTriple() {
+  return document.getElementById("noTripleCheck").checked;
+}
+
 function getBruteTotal() {
   const len = parseInt(document.getElementById("bruteLen").value) || 3;
   const mode = document.getElementById("bruteChars").value;
@@ -1037,6 +1057,8 @@ function generateBrute() {
     }
   }
 
+  if (isNoTriple()) collected = collected.filter(w => !hasTripleVowelConsonant(w));
+
   document.getElementById("domainInput").value = collected.join("\n");
   setMode("list");
   updateDomainCount();
@@ -1135,6 +1157,7 @@ function generateKeyword() {
   add(base + base.split("").reverse().join(""));
 
   let arr = [...names];
+  if (isNoTriple()) arr = arr.filter(w => !hasTripleVowelConsonant(w));
   for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [arr[i], arr[j]] = [arr[j], arr[i]];
@@ -1224,7 +1247,7 @@ function generateFromPattern() {
   while (names.size < count && attempts < count * 10) {
     const pat = patterns[Math.floor(Math.random() * patterns.length)];
     const word = prefix + genFromPattern(pat, excluded) + suffix;
-    if (word.length >= 3) names.add(word);
+    if (word.length >= 3 && (!isNoTriple() || !hasTripleVowelConsonant(word))) names.add(word);
     attempts++;
   }
 
@@ -1343,6 +1366,7 @@ function generateAIDomains() {
 
   let names = [...results]
     .filter(n => !excluded.length || !excluded.some(c => n.includes(c)));
+  if (isNoTriple()) names = names.filter(n => !hasTripleVowelConsonant(n));
   aiShuffle(names);
   names = names.slice(0, 20);
 
