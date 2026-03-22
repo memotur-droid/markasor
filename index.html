@@ -396,14 +396,14 @@
     <!-- AI GENERATE SECTION (from repo version) -->
     <div id="aiSection" class="hidden">
       <div class="gen-box" style="margin-bottom:14px;">
-        <h3>🤖 AI Domain Üretici — Claude ile Yaratıcı İsimler</h3>
-        <div class="label">Anahtar kelime girin, AI yaratıcı domain önerileri üretsin</div>
+        <h3>🤖 AI Domain Üretici — Akıllı İsim Motoru</h3>
+        <div class="label">Anahtar kelime girin, yaratıcı domain önerileri üretilsin (örn: hayvan, teknoloji, yemek...)</div>
         <div style="display:flex; gap:8px;">
           <input class="kinput" id="aiKeywordInput" placeholder="örn: yapay zeka, fintech, sağlık..." onkeydown="if(event.key==='Enter')generateAIDomains()">
           <button class="btn btn-go" id="aiGenerateBtn" onclick="generateAIDomains()">🤖 Üret</button>
         </div>
         <div style="margin-top:6px;font-size:10px;color:#94a3b8;font-family:'Inter',sans-serif;">
-          Claude API kullanır — API anahtarı gerektirir (tarayıcıdan doğrudan çalışmayabilir)
+          Türkçe kelime havuzu ile çalışır — API gerektirmez, tamamen ücretsiz
         </div>
       </div>
     </div>
@@ -1233,32 +1233,125 @@ function generateFromPattern() {
   updateDomainCount();
 }
 
-// ===================== AI DOMAIN GENERATOR (Claude API) =====================
-async function generateAIDomains() {
+// ===================== AI DOMAIN GENERATOR (Client-Side — Brandable) =====================
+const aiWordBank = {
+  hayvan: ["aslan","kartal","kurt","panter","kaplan","tilki","yunus","sahin","jaguar","leopar","falcon","ayi","geyik","tavsan","pelikan","flamingo","papagan","baykus","karga","atmaca","turna","leylek","serce","kedi","kopek","at","fil","zurafa","penguen","koala","panda","ahtapot","balina","fok","kunduz","sincap","ari","kelebek","yilan","timsah","deve","ceylan","bizon","karinca","kurt","boga","koç","puma","cobra","viper"],
+  teknoloji: ["pixel","byte","nano","cyber","meta","sync","data","cloud","logic","nexus","turbo","veri","kod","dijital","robot","sistem","bilgi","link","node","bit","pulse","flux","grid","hub","lab","dev","stack","core","portal","matrix","algo","proto","zeka","modul","craft","spark","beam","bolt","chip","wire"],
+  yemek: ["lezzet","tat","gurme","baharat","tarif","sofra","mutfak","kebap","dolma","pilav","borek","corba","salata","meze","tatli","bal","zeytin","peynir","ekmek","simit","pide","nane","kekik","safran","sumak","karanfil","tarçin","vanilya","kakao","fistik"],
+  saglik: ["vita","sifa","denge","enerji","guc","aktif","fit","yasam","hayat","nefes","kalp","zihin","beden","ruh","doga","yesil","temiz","saf","organik","canli","hareket","spor","yoga","detox"],
+  finans: ["para","finans","borsa","kripto","gelir","kazanc","varlik","sermaye","fon","kredi","banka","odeme","cuzdan","altin","doviz","kar","hisse","piyasa","trade","coin"],
+  egitim: ["bilgi","okul","ders","kurs","akademi","sinif","kitap","kalem","bilim","kesif","merak","deney","teori","pratik","mentor","rehber","usta","ogren"],
+  sanat: ["renk","boya","firca","tuval","muzik","nota","melodi","ritim","sahne","dans","heykel","cizim","tasarim","ilham","galeri","atolye","studyo","palet","harmoni","ton","beste","siir"],
+  seyahat: ["yol","gezi","tur","kesif","macera","rota","pusula","harita","otel","tatil","plaj","dag","deniz","gol","orman","sehir","ada","koy","liman","ucus"],
+  spor: ["gol","skor","mac","takim","oyun","koç","sampiyon","kupa","lig","saha","kort","basket","futbol","tenis","yuzme","boks","gures","maraton","sprint","forma"],
+  doga: ["yaprak","cicek","agac","orman","dag","nehir","gol","deniz","gunes","ay","yildiz","bulut","yagmur","ruzgar","toprak","kaya","mercan","vadi","tepe","selale","buzul"]
+};
+
+const aiNorm = s => s.toLowerCase().replace(/[ıİ]/g,"i").replace(/[şŞ]/g,"s").replace(/[çÇ]/g,"c").replace(/[üÜ]/g,"u").replace(/[öÖ]/g,"o").replace(/[ğĞ]/g,"g").replace(/[^a-z0-9 ]/g,"");
+
+function aiFindWords(keyword) {
+  const kw = aiNorm(keyword);
+  const kwParts = kw.split(/\s+/).filter(w => w.length > 1);
+  let words = [];
+  for (const [cat, list] of Object.entries(aiWordBank)) {
+    const catN = aiNorm(cat);
+    if (kwParts.some(k => catN.includes(k) || k.includes(catN))) words = words.concat(list);
+    else list.forEach(w => { if (kwParts.some(k => w.includes(k) || k.includes(w))) words.push(w); });
+  }
+  kwParts.forEach(k => { if (k.length > 1) words.push(k); });
+  return [...new Set(words)];
+}
+
+function aiShuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function aiPick(a) { return a[Math.floor(Math.random() * a.length)]; }
+
+function aiPortmanteau(w1, w2) {
+  // İki kelimenin parçalarını birleştir: aslan+kaplan → aslaplan, kartal+digital → kartital
+  const cuts = [
+    w1.slice(0, Math.ceil(w1.length * 0.6)) + w2.slice(Math.floor(w2.length * 0.4)),
+    w1.slice(0, Math.ceil(w1.length * 0.5)) + w2.slice(Math.floor(w2.length * 0.5)),
+    w1.slice(0, 3) + w2.slice(-3),
+    w1.slice(0, 4) + w2.slice(-2),
+  ];
+  return cuts[Math.floor(Math.random() * cuts.length)];
+}
+
+function aiVowelSwap(w) {
+  // Sesli harfleri değiştirerek yeni kelime: aslan → oslon, kartal → kortel
+  const vowels = "aeiou";
+  const alt = "oiuae";
+  return w.split("").map(c => { const i = vowels.indexOf(c); return i >= 0 ? alt[i] : c; }).join("");
+}
+
+function aiReverse(w) { return w.split("").reverse().join(""); }
+
+function aiDoubleChar(w) {
+  // Bir harfi çiftleyerek marka ismi: kurt → kuurrt, aslan → asslan
+  if (w.length < 3) return w;
+  const i = 1 + Math.floor(Math.random() * (w.length - 2));
+  return w.slice(0, i) + w[i] + w.slice(i);
+}
+
+function aiTruncate(w) {
+  // Kısa, brandable versiyon
+  if (w.length <= 4) return w;
+  const len = 3 + Math.floor(Math.random() * 2); // 3-4 harf
+  return w.slice(0, len);
+}
+
+function generateAIDomains() {
   const kw = document.getElementById("aiKeywordInput").value.trim();
   if (!kw) return;
   const btn = document.getElementById("aiGenerateBtn");
   btn.disabled = true; btn.textContent = "Üretiliyor...";
-  try {
-    const resp = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
-        max_tokens: 1000,
-        messages: [{ role: "user", content: '"' + kw + '" anahtar kelimesine dayalı 20 yaratıcı, kısa domain adı öner. TLD ekleme. Her satıra bir tane. Numara/açıklama yok.' + (getExcludedChars().length ? ' ŞU HARFLERİ KESİNLİKLE KULLANMA: ' + getExcludedChars().join(', ') + '.' : '') }]
-      })
-    });
-    const data = await resp.json();
-    const text = (data.content && data.content[0] && data.content[0].text) || "";
-    const excluded = getExcludedChars();
-    const names = text.split("\n").map(l => l.trim().replace(/^\d+[\.\)\-]\s*/, "").replace(/\s.*$/, "")).filter(l => l && l.length > 1).filter(n => !excluded.length || !excluded.some(c => n.toLowerCase().includes(c)));
-    if (names.length) {
-      document.getElementById("domainInput").value = names.join("\n");
-      setMode("list");
-      updateDomainCount();
-    }
-  } catch (e) { console.error(e); }
+
+  let words = aiFindWords(kw);
+  if (!words.length) words = kw.split(/[\s,;]+/).filter(w => w.length > 1);
+  aiShuffle(words);
+  const pool = words.slice(0, 25);
+
+  const excluded = typeof getExcludedChars === "function" ? getExcludedChars() : [];
+  const results = new Set();
+  const add = n => { n = n.toLowerCase().replace(/[^a-z0-9]/g,""); if (n.length >= 3 && n.length <= 16) results.add(n); };
+
+  // 1) Portmanteau — iki kelimeyi harmanla
+  for (let i = 0; i < pool.length - 1; i++) {
+    add(aiPortmanteau(pool[i], pool[i + 1]));
+    add(aiPortmanteau(pool[i + 1], pool[i]));
+  }
+  // 2) Sesli harf değiştirme — yeni ses
+  pool.slice(0, 10).forEach(w => add(aiVowelSwap(w)));
+  // 3) Kısalt + birleştir — "brandable" kısa isimler
+  for (let i = 0; i < pool.length - 1; i += 2) {
+    add(aiTruncate(pool[i]) + aiTruncate(pool[i + 1]));
+  }
+  // 4) Harf çiftleme — dikkat çekici yazım
+  pool.slice(0, 8).forEach(w => add(aiDoubleChar(w)));
+  // 5) Ters çevir + kısalt
+  pool.slice(0, 6).forEach(w => { const r = aiReverse(w); add(r); add(r.slice(0, 4) + aiPick(pool).slice(0, 3)); });
+  // 6) İki kısa kelime yan yana
+  for (let i = 0; i < Math.min(pool.length, 12); i++) {
+    const other = aiPick(pool);
+    if (other !== pool[i]) add(pool[i] + other);
+  }
+  // 7) Hece karıştırma — ilk hecesini al, başkasının sonunu ekle
+  pool.slice(0, 10).forEach(w => {
+    const half = Math.ceil(w.length / 2);
+    const other = aiPick(pool);
+    add(w.slice(0, half) + other.slice(Math.floor(other.length / 2)));
+  });
+
+  let names = [...results]
+    .filter(n => !excluded.length || !excluded.some(c => n.includes(c)));
+  aiShuffle(names);
+  names = names.slice(0, 20);
+
+  if (names.length) {
+    document.getElementById("domainInput").value = names.join("\n");
+    setMode("list");
+    updateDomainCount();
+  }
+
   btn.disabled = false; btn.textContent = "🤖 Üret";
 }
 
