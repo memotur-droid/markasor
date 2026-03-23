@@ -522,21 +522,6 @@
     </div>
   </div>
 
-  <!-- FAVORITES SECTION -->
-  <div class="card" id="favSection" style="overflow:hidden; margin-top:14px;">
-    <div class="fav-header">
-      <h2>⭐ Favorilerim <span class="fav-count" id="favCount">0</span></h2>
-      <div class="fav-actions">
-        <button class="btn btn-dim" id="favExportBtn" onclick="exportFavCSV()" style="font-size:11px;padding:6px 14px;">📥 CSV</button>
-        <button class="btn btn-dim" id="favCopyBtn" onclick="copyFavorites()" style="font-size:11px;padding:6px 14px;">📋 Kopyala</button>
-        <button class="btn btn-dim" id="favClearBtn" onclick="clearFavorites()" style="font-size:11px;padding:6px 14px;color:#dc2626;">🗑 Tümünü Sil</button>
-      </div>
-    </div>
-    <div class="scroll-box" id="favList" style="max-height:400px;"></div>
-    <div class="fav-empty" id="favEmpty">Henüz favori eklenmedi. Sonuçlardaki ⭐ butonuna tıklayarak favori ekleyebilirsiniz.</div>
-    <div class="fav-note" id="favNote">💾 Favoriler tarayıcınızda kalıcı olarak saklanır. Cihazlar arası senkron için Google ile giriş yapın.</div>
-  </div>
-
   <!-- TRADEMARK SEARCH SECTION -->
   <div class="card" style="padding:20px; margin-top:14px;" id="trademarkSection">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
@@ -570,6 +555,21 @@
       <a href="https://tmsearch.uspto.gov/" target="_blank" style="font-size:13px;color:#4f46e5;text-decoration:none;font-family:'Inter',sans-serif;font-weight:600;">USPTO ↗</a>
       <a href="https://euipo.europa.eu/eSearch/" target="_blank" style="font-size:13px;color:#4f46e5;text-decoration:none;font-family:'Inter',sans-serif;font-weight:600;">EUIPO ↗</a>
     </div>
+  </div>
+
+  <!-- FAVORITES SECTION -->
+  <div class="card" id="favSection" style="overflow:hidden; margin-top:14px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);">
+      <h2 style="font-family:'Inter',sans-serif;font-size:15px;font-weight:700;color:var(--text);margin:0;display:flex;align-items:center;gap:6px;">⭐ Favorilerim <span class="fav-count" id="favCount" style="font-size:12px;color:var(--accent);font-family:'JetBrains Mono',monospace;background:#eef2ff;padding:2px 10px;border-radius:6px;">0</span></h2>
+      <div class="fav-actions">
+        <button class="btn btn-dim" id="favExportBtn" onclick="exportFavCSV()" style="font-size:10px;padding:4px 10px;">📥 CSV</button>
+        <button class="btn btn-dim" id="favCopyBtn" onclick="copyFavorites()" style="font-size:10px;padding:4px 10px;">📋 Kopyala</button>
+        <button class="btn btn-dim" id="favClearBtn" onclick="clearFavorites()" style="font-size:10px;padding:4px 10px;color:#dc2626;">🗑 Sil</button>
+      </div>
+    </div>
+    <div class="scroll-box" id="favList" style="max-height:250px;"></div>
+    <div class="fav-empty" id="favEmpty" style="padding:24px 16px;font-size:13px;">Henüz favori eklenmedi. Sonuçlardaki ⭐ butonuna tıklayarak ekleyin.</div>
+    <div class="fav-note" id="favNote">💾 Favoriler tarayıcınızda saklanır.</div>
   </div>
 
   <div class="footer">RDAP (registry) + Google DNS + Cloudflare DNS · WIPO Global Brand Database · Türkpatent + USPTO + EUIPO</div>
