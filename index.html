@@ -283,10 +283,11 @@
 
   <div class="mode-center">
     <div class="mode-sw">
-      <button class="mode-b on" id="modeList" onclick="setMode('list')">📋 Liste Gir</button>
-      <button class="mode-b" id="modeGen" onclick="setMode('generate')">⚡ Üretici</button>
+      <button class="mode-b on" id="modeList" onclick="setMode('list')">📋 Liste</button>
+      <button class="mode-b" id="modeBrute" onclick="setMode('brute')">🔤 Brute Force</button>
+      <button class="mode-b" id="modeKeyword" onclick="setMode('keyword')">🎯 Keyword</button>
       <button class="mode-b" id="modePattern" onclick="setMode('pattern')">🎲 Pattern</button>
-      <button class="mode-b" id="modeAI" onclick="setMode('ai')">🤖 AI Üret</button>
+      <button class="mode-b" id="modeAI" onclick="setMode('ai')">🤖 AI</button>
     </div>
   </div>
 
@@ -303,83 +304,80 @@
       </div>
     </div>
 
-    <!-- GENERATOR SECTION -->
-    <div id="genSection" class="hidden">
-
-      <div class="gen-grid">
-        <!-- Brute Force -->
-        <div class="gen-box">
-          <h3>🔤 Brute Force — Tüm Kombinasyonlar</h3>
-          <div class="gen-row">
-            <span class="gen-label">Uzunluk:</span>
-            <input type="number" class="small-input" id="bruteLen" value="3" min="2" max="6" onchange="updatePreview()">
-            <span class="gen-label">harf</span>
-          </div>
-          <div class="gen-row">
-            <span class="gen-label">Karakterler:</span>
-            <select id="bruteChars" onchange="updatePreview()">
-              <option value="alpha">a-z (harf)</option>
-              <option value="alphanum">a-z + 0-9</option>
-              <option value="vowel">Sesli harfli (CVCVC)</option>
-              <option value="consonant">Sessiz + sesli mix</option>
-            </select>
-          </div>
-          <div class="gen-row">
-            <span class="gen-label">Başlangıç:</span>
-            <input type="text" class="small-input" id="bruteStart" placeholder="a" maxlength="3" style="width:50px" onchange="updatePreview()">
-            <span class="gen-label">Bitiş:</span>
-            <input type="text" class="small-input" id="bruteEnd" placeholder="z" maxlength="3" style="width:50px" onchange="updatePreview()">
-          </div>
-          <div class="gen-row">
-            <span class="gen-label">Limit:</span>
-            <input type="number" class="small-input" id="bruteLimit" value="1000" min="1" max="100000" style="width:90px" onchange="updatePreview()">
-          </div>
-          <div class="checkbox-row">
-            <input type="checkbox" id="bruteRandom" checked onchange="updatePreview()">
-            <label for="bruteRandom">Rastgele sırala</label>
-          </div>
-          <div style="margin-top:8px">
-            <span class="gen-count" id="bruteCount">Toplam: hesaplanıyor...</span>
-          </div>
+    <!-- BRUTE FORCE SECTION -->
+    <div id="bruteSection" class="hidden">
+      <div class="gen-box">
+        <h3>🔤 Brute Force — Tüm Kombinasyonlar</h3>
+        <div class="gen-row">
+          <span class="gen-label">Uzunluk:</span>
+          <input type="number" class="small-input" id="bruteLen" value="3" min="2" max="6" onchange="updatePreview()">
+          <span class="gen-label">harf</span>
         </div>
-
-        <!-- Pattern / Keyword -->
-        <div class="gen-box">
-          <h3>🎯 Akıllı Üretici — Keyword + Pattern</h3>
-          <div class="gen-row">
-            <span class="gen-label">Kelime:</span>
-            <input type="text" class="kinput" id="kwInput" placeholder="örn: tech, crypto, ai" style="font-size:12px">
-          </div>
-          <div class="gen-row" style="margin-top:4px">
-            <span class="gen-label">Mod:</span>
-            <select id="kwMode">
-              <option value="all">Tüm kombinasyonlar</option>
-              <option value="prefix">Prefix + kelime</option>
-              <option value="suffix">Kelime + suffix</option>
-              <option value="sandwich">Prefix + kelime + suffix</option>
-              <option value="two">İki kelime birleştir</option>
-            </select>
-          </div>
-          <div class="gen-row" style="margin-top:4px">
-            <span class="gen-label">Max uzunluk:</span>
-            <input type="number" class="small-input" id="kwMaxLen" value="12" min="3" max="30" style="width:60px">
-          </div>
-          <div class="gen-row" style="margin-top:4px">
-            <span class="gen-label">Limit:</span>
-            <input type="number" class="small-input" id="kwLimit" value="500" min="1" max="50000" style="width:90px">
-          </div>
-          <div class="checkbox-row" style="margin-top:4px">
-            <input type="checkbox" id="kwNumbers" >
-            <label for="kwNumbers">Sayı ekle (1-99)</label>
-          </div>
-          <div class="checkbox-row">
-            <input type="checkbox" id="kwHyphen">
-            <label for="kwHyphen">Tireli versiyonlar da ekle</label>
-          </div>
+        <div class="gen-row">
+          <span class="gen-label">Karakterler:</span>
+          <select id="bruteChars" onchange="updatePreview()">
+            <option value="alpha">a-z (harf)</option>
+            <option value="alphanum">a-z + 0-9</option>
+            <option value="vowel">Sesli harfli (CVCVC)</option>
+            <option value="consonant">Sessiz + sesli mix</option>
+          </select>
+        </div>
+        <div class="gen-row">
+          <span class="gen-label">Başlangıç:</span>
+          <input type="text" class="small-input" id="bruteStart" placeholder="a" maxlength="3" style="width:50px" onchange="updatePreview()">
+          <span class="gen-label">Bitiş:</span>
+          <input type="text" class="small-input" id="bruteEnd" placeholder="z" maxlength="3" style="width:50px" onchange="updatePreview()">
+        </div>
+        <div class="gen-row">
+          <span class="gen-label">Limit:</span>
+          <input type="number" class="small-input" id="bruteLimit" value="1000" min="1" max="100000" style="width:90px" onchange="updatePreview()">
+        </div>
+        <div class="checkbox-row">
+          <input type="checkbox" id="bruteRandom" checked onchange="updatePreview()">
+          <label for="bruteRandom">Rastgele sırala</label>
+        </div>
+        <div style="margin-top:8px">
+          <span class="gen-count" id="bruteCount">Toplam: hesaplanıyor...</span>
         </div>
       </div>
-
       <div id="genWarn" class="warn hidden"></div>
+    </div>
+
+    <!-- KEYWORD SECTION -->
+    <div id="keywordSection" class="hidden">
+      <div class="gen-box">
+        <h3>🎯 Akıllı Üretici — Keyword</h3>
+        <div class="gen-row">
+          <span class="gen-label">Kelime:</span>
+          <input type="text" class="kinput" id="kwInput" placeholder="örn: tech, crypto, ai" style="font-size:12px">
+        </div>
+        <div class="gen-row" style="margin-top:4px">
+          <span class="gen-label">Mod:</span>
+          <select id="kwMode">
+            <option value="all">Tüm kombinasyonlar</option>
+            <option value="prefix">Prefix + kelime</option>
+            <option value="suffix">Kelime + suffix</option>
+            <option value="sandwich">Prefix + kelime + suffix</option>
+            <option value="two">İki kelime birleştir</option>
+          </select>
+        </div>
+        <div class="gen-row" style="margin-top:4px">
+          <span class="gen-label">Max uzunluk:</span>
+          <input type="number" class="small-input" id="kwMaxLen" value="12" min="3" max="30" style="width:60px">
+        </div>
+        <div class="gen-row" style="margin-top:4px">
+          <span class="gen-label">Limit:</span>
+          <input type="number" class="small-input" id="kwLimit" value="500" min="1" max="50000" style="width:90px">
+        </div>
+        <div class="checkbox-row" style="margin-top:4px">
+          <input type="checkbox" id="kwNumbers">
+          <label for="kwNumbers">Sayı ekle (1-99)</label>
+        </div>
+        <div class="checkbox-row">
+          <input type="checkbox" id="kwHyphen">
+          <label for="kwHyphen">Tireli versiyonlar da ekle</label>
+        </div>
+      </div>
     </div>
 
     <!-- PATTERN SECTION (from repo version) -->
@@ -896,15 +894,17 @@ let currentMode = "list";
 function setMode(m) {
   currentMode = m;
   document.getElementById("modeList").className = "mode-b" + (m === "list" ? " on" : "");
-  document.getElementById("modeGen").className = "mode-b" + (m === "generate" ? " on" : "");
+  document.getElementById("modeBrute").className = "mode-b" + (m === "brute" ? " on" : "");
+  document.getElementById("modeKeyword").className = "mode-b" + (m === "keyword" ? " on" : "");
   document.getElementById("modePattern").className = "mode-b" + (m === "pattern" ? " on" : "");
   document.getElementById("modeAI").className = "mode-b" + (m === "ai" ? " on" : "");
-  document.getElementById("genSection").className = m === "generate" ? "" : "hidden";
+  document.getElementById("bruteSection").className = m === "brute" ? "" : "hidden";
+  document.getElementById("keywordSection").className = m === "keyword" ? "" : "hidden";
   document.getElementById("patternSection").className = m === "pattern" ? "" : "hidden";
   document.getElementById("aiSection").className = m === "ai" ? "" : "hidden";
   document.getElementById("listSection").className = m === "list" ? "" : "hidden";
   document.getElementById("excludeSection").className = (m === "list") ? "hidden" : "";
-  if (m === "generate") updatePreview();
+  if (m === "brute") updatePreview();
 }
 
 
@@ -1686,7 +1686,8 @@ async function dnsOnlyCheck(domain) {
 
 async function startCheck() {
   // Üretici modundaysa önce üret
-  if (currentMode === "generate") generateBrute();
+  if (currentMode === "brute") generateBrute();
+  else if (currentMode === "keyword") generateKeyword();
   else if (currentMode === "pattern") generateFromPattern();
   else if (currentMode === "ai") generateAIDomains();
 
