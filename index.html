@@ -582,7 +582,7 @@
 const TLD_OPTIONS = [".com",".net",".org",".io",".dev",".co",".app",".xyz",".ai",".tech",".me",".info"];
 let selectedTLDs = [".com"];
 let results = [];
-let currentFilter = "all";
+let currentFilter = "available";
 let aborted = false;
 let checking = false;
 let checkStartTime = 0;
@@ -1713,7 +1713,7 @@ async function startCheck() {
   };
   const speed = speedConf[document.getElementById("speedMode").value] || speedConf.normal;
 
-  checking = true; aborted = false; results = []; currentFilter = "all";
+  checking = true; aborted = false; results = []; currentFilter = "available";
   checkStartTime = Date.now();
   document.getElementById("startBtn").classList.add("hidden");
   document.getElementById("stopBtn").classList.remove("hidden");
