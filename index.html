@@ -470,7 +470,7 @@
     </div>
 
     <div class="actions" style="margin-top:8px;">
-      <button class="btn btn-go" id="startBtn" onclick="startCheck()">🔍 Kontrol Başlat</button>
+      <button class="btn btn-go" id="startBtn" onclick="startCheck()">🔍 Domain Sor</button>
       <button class="btn btn-stop hidden" id="stopBtn" onclick="stopCheck()">⏹ Durdur</button>
       <button class="btn btn-dim" onclick="document.getElementById('domainInput').value='';updateDomainCount();">🗑️ Listeyi Temizle</button>
       <span id="domainCountBadge" style="font-size:14px;color:#4f46e5;font-weight:600;font-family:'Inter',sans-serif"></span>
@@ -1180,7 +1180,7 @@ function generateKeyword() {
   arr = arr.slice(0, limit);
 
   const warn = document.getElementById("genWarn");
-  warn.textContent = `✅ ${arr.length.toLocaleString("tr-TR")} domain üretildi. "Kontrol Başlat" ile sorgulamaya başlayabilirsiniz.`;
+  warn.textContent = `✅ ${arr.length.toLocaleString("tr-TR")} domain üretildi. "Domain Sor" ile sorgulamaya başlayabilirsiniz.`;
   warn.classList.remove("hidden");
 
   document.getElementById("domainInput").value = arr.join("\n");
