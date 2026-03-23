@@ -341,7 +341,6 @@
           <div style="margin-top:8px">
             <span class="gen-count" id="bruteCount">Toplam: hesaplanıyor...</span>
           </div>
-          <button class="btn btn-go" style="margin-top:10px;width:100%" onclick="generateBrute()">🔤 Brute Force Üret</button>
         </div>
 
         <!-- Pattern / Keyword -->
@@ -377,7 +376,6 @@
             <input type="checkbox" id="kwHyphen">
             <label for="kwHyphen">Tireli versiyonlar da ekle</label>
           </div>
-          <button class="btn btn-go" style="margin-top:10px;width:100%" onclick="generateKeyword()">🎯 Akıllı Üret</button>
         </div>
       </div>
 
@@ -393,7 +391,6 @@
         <div style="display:flex; gap:8px; margin-top:8px;">
           <input class="kinput" id="patternCustom" placeholder="Özel kalıp: örn CVCCV, VCCVCV..." style="flex:1;">
           <input class="small-input" id="patternCount" type="number" value="100" min="1" max="100000" placeholder="Adet" style="width:80px;">
-          <button class="btn btn-go" onclick="generateFromPattern()">Üret</button>
         </div>
         <div style="margin-top:8px; display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
           <label style="font-size:11px; color:#64748b; display:flex; align-items:center; gap:4px; cursor:pointer;">
@@ -416,7 +413,7 @@
         <div class="label">Anahtar kelime girin, yaratıcı domain önerileri üretilsin (örn: hayvan, teknoloji, yemek...)</div>
         <div style="display:flex; gap:8px;">
           <input class="kinput" id="aiKeywordInput" placeholder="örn: yapay zeka, fintech, sağlık..." onkeydown="if(event.key==='Enter')generateAIDomains()">
-          <button class="btn btn-go" id="aiGenerateBtn" onclick="generateAIDomains()">🤖 Üret</button>
+          <button class="btn btn-go hidden" id="aiGenerateBtn" onclick="generateAIDomains()">🤖 Üret</button>
         </div>
         <div style="margin-top:6px;font-size:10px;color:#94a3b8;font-family:'Inter',sans-serif;">
           Türkçe kelime havuzu ile çalışır — API gerektirmez, tamamen ücretsiz
@@ -895,7 +892,9 @@ TLD_OPTIONS.forEach(tld => {
 });
 
 // ===================== MODE =====================
+let currentMode = "list";
 function setMode(m) {
+  currentMode = m;
   document.getElementById("modeList").className = "mode-b" + (m === "list" ? " on" : "");
   document.getElementById("modeGen").className = "mode-b" + (m === "generate" ? " on" : "");
   document.getElementById("modePattern").className = "mode-b" + (m === "pattern" ? " on" : "");
@@ -1077,7 +1076,6 @@ function generateBrute() {
   if (isNoTriple()) collected = collected.filter(w => !hasTripleVowelConsonant(w));
 
   document.getElementById("domainInput").value = collected.join("\n");
-  setMode("list");
   updateDomainCount();
 }
 
@@ -1186,7 +1184,6 @@ function generateKeyword() {
   warn.classList.remove("hidden");
 
   document.getElementById("domainInput").value = arr.join("\n");
-  setMode("list");
   updateDomainCount();
 }
 
@@ -1269,7 +1266,6 @@ function generateFromPattern() {
   }
 
   document.getElementById("domainInput").value = [...names].join("\n");
-  setMode("list");
   updateDomainCount();
 }
 
@@ -1389,7 +1385,6 @@ function generateAIDomains() {
 
   if (names.length) {
     document.getElementById("domainInput").value = names.join("\n");
-    setMode("list");
     updateDomainCount();
   } else {
     alert("Sonuç bulunamadı. Farklı bir kelime deneyin.\nÖrnek kategoriler: hayvan, teknoloji, yemek, sağlık, finans, eğitim, sanat, seyahat, spor, doğa");
@@ -1690,6 +1685,14 @@ async function dnsOnlyCheck(domain) {
 }
 
 async function startCheck() {
+  // Üretici modundaysa önce üret
+  if (currentMode === "generate") generateBrute();
+  else if (currentMode === "pattern") generateFromPattern();
+  else if (currentMode === "ai") generateAIDomains();
+
+  // Küçük gecikme — AI üretici async olabilir
+  if (currentMode === "ai") await new Promise(r => setTimeout(r, 100));
+
   const lines = document.getElementById("domainInput").value.split("\n").map(d => d.trim()).filter(d => d.length > 0);
   if (!lines.length) return;
 
