@@ -29,19 +29,7 @@
 
   /* Header */
   .header { text-align: left; margin-bottom: 20px; }
-  .header-row { display: inline-flex; align-items: center; gap: 12px; margin-bottom: 4px; }
-  .logo {
-    width: 40px; height: 40px; border-radius: 12px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    display: flex; align-items: center; justify-content: center;
-    font-size: 20px; font-weight: 900; color: #fff;
-    font-family: 'Inter', sans-serif;
-    box-shadow: 0 4px 14px rgba(79,70,229,0.25);
-  }
-  .header h1 {
-    font-family: 'Inter', sans-serif; font-size: 28px; font-weight: 900;
-    color: var(--text); letter-spacing: -0.5px;
-  }
+  .header svg { height: 48px; width: auto; }
   .header p { color: var(--dim); font-size: 13px; font-family: 'Inter', sans-serif; margin-top: 2px; font-weight: 400; }
 
   /* Card */
@@ -251,9 +239,7 @@
     .wrap { padding: 16px 12px; }
     .stats { grid-template-columns: repeat(2, 1fr); gap: 8px; }
     .gen-grid { grid-template-columns: 1fr; }
-    .header h1 { font-size: 22px; }
-    .header-row { gap: 8px; }
-    .logo { width: 34px; height: 34px; font-size: 16px; border-radius: 10px; }
+    .header svg { height: 36px; }
     .mode-b { padding: 7px 14px; font-size: 12px; }
     .stat-num { font-size: 22px; }
     .btn { padding: 10px 18px; font-size: 13px; }
@@ -268,7 +254,7 @@
 <div class="wrap">
   <div class="header">
     <div style="display:flex;align-items:center;justify-content:flex-start;gap:0;margin-bottom:6px;">
-      <svg viewBox="0 0 580 150" style="height:48px;width:auto;" aria-label="Markasor">
+      <svg viewBox="0 0 580 150" aria-label="Markasor">
         <defs><linearGradient id="logoGrad" x1="0%" y1="50%" x2="100%" y2="50%"><stop offset="0%" stop-color="#312e81"/><stop offset="100%" stop-color="#4f46e5"/></linearGradient></defs>
         <text x="0" y="108" font-family="Inter, Arial, sans-serif" font-size="100" font-weight="900" fill="url(#logoGrad)" letter-spacing="-7">markas</text>
         <circle cx="386" cy="72" r="32" fill="none" stroke="#dc2626" stroke-width="14"/>
@@ -1109,7 +1095,7 @@ function generateKeyword() {
   const extras = words.slice(1);
 
   const prefixes = ["go","get","try","use","my","the","hey","one","all","pro","super","hyper","ultra","mega","neo","nova","zen","flux","vibe","dash","snap","swift","prime","next","fast","easy","smart","deep","open","true","pure","top","max","hi","up","on","re","be","do","no","so","we","ok","mr","el","la","de"];
-  const suffixes = ["ly","io","fy","hub","lab","box","pad","app","now","go","up","ify","ist","ful","zen","ai","hq","dev","base","cloud","flow","spot","nest","wave","dock","mint","link","sync","pulse","core","shift","stack","kit","line","path","way","x","co","zone","ify","oid","ium","ary","ery","ory","ica","eo","ix","ox","us","is","er","ed","en","or","ar","al","el","ia","ya","ik","ak","ok","uk"];
+  const suffixes = ["ly","io","fy","hub","lab","box","pad","app","now","go","up","ify","ist","ful","zen","ai","hq","dev","base","cloud","flow","spot","nest","wave","dock","mint","link","sync","pulse","core","shift","stack","kit","line","path","way","x","co","zone","oid","ium","ary","ery","ory","ica","eo","ix","ox","us","is","er","ed","en","or","ar","al","el","ia","ya","ik","ak","ok","uk"];
   const middles = ["and","or","to","for","in","on","at","by","of","is","it","no","so","do","go","be","me","we","up","my"];
 
   const names = new Set();
@@ -1998,7 +1984,7 @@ function exportCSV() {
   const blob = new Blob([csv], { type:"text/csv;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
-  a.href = url; a.download = "domain-sonuclari.csv"; a.click();
+  a.href = url; a.download = "markasor-sonuclari.csv"; a.click();
   URL.revokeObjectURL(url);
 }
 
