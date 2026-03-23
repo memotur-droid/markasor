@@ -491,10 +491,10 @@
   </div>
 
   <div class="stats hidden" id="statsSection">
-    <div class="card stat-card stat-clickable" onclick="setFilter('all')"><div class="stat-num" id="statAll" style="color:#4f46e5">0</div><div class="stat-label">Toplam</div></div>
     <div class="card stat-card stat-clickable" onclick="setFilter('available')"><div class="stat-num" id="statAvail" style="color:#059669">0</div><div class="stat-label">Müsait</div></div>
     <div class="card stat-card stat-clickable" onclick="setFilter('taken')"><div class="stat-num" id="statTaken" style="color:#dc2626">0</div><div class="stat-label">Kayıtlı</div></div>
     <div class="card stat-card stat-clickable" onclick="setFilter('error')"><div class="stat-num" id="statError" style="color:#d97706">0</div><div class="stat-label">Belirsiz</div></div>
+    <div class="card stat-card stat-clickable" onclick="setFilter('all')"><div class="stat-num" id="statAll" style="color:#4f46e5">0</div><div class="stat-label">Toplam</div></div>
   </div>
 
   <div class="card hidden" id="resultsCard" style="overflow:hidden;">
@@ -1800,7 +1800,7 @@ function renderResults() {
   document.getElementById("statError").textContent = counts.error.toLocaleString("tr-TR");
 
   document.querySelectorAll(".stat-clickable").forEach((el, i) => {
-    const keys = ["all","available","taken","error"];
+    const keys = ["available","taken","error","all"];
     el.classList.toggle("active-filter", currentFilter === keys[i]);
   });
 
