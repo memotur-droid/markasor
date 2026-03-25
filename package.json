@@ -1,0 +1,18 @@
+{
+  "name": "markasor",
+  "version": "1.0.0",
+  "description": "",
+  "main": "monitor.js",
+  "scripts": {
+    "start": "node monitor.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://local_proxy@127.0.0.1:41783/git/memotur-droid/markasor"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {}
+}
