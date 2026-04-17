@@ -384,10 +384,10 @@
     <div id="patternSection" class="hidden">
       <div class="gen-box" style="margin-bottom:14px;">
         <h3>🎲 Pattern Üretici — Sessiz/Sesli Kalıp</h3>
-        <div class="label">Harf kalıbı seçin veya özel kalıp yazın (C=sessiz, V=sesli)</div>
+        <div class="label">Harf kalıbı seçin veya özel kalıp yazın (C=sessiz, V=sesli, küçük harf=sabit. Örn: CiC → sabit i)</div>
         <div class="tld-row" id="patternChips" style="margin-bottom:10px;"></div>
         <div style="display:flex; gap:8px; margin-top:8px;">
-          <input class="kinput" id="patternCustom" placeholder="Özel kalıp: örn CVCCV, VCCVCV..." style="flex:1;">
+          <input class="kinput" id="patternCustom" placeholder="Özel kalıp: örn CVCCV, CiC, VaCV..." style="flex:1;">
           <input class="small-input" id="patternCount" type="number" value="100" min="1" max="100000" placeholder="Adet" style="width:80px;">
         </div>
         <div style="margin-top:8px; display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
@@ -1234,15 +1234,22 @@ function genFromPattern(pat, excluded) {
   const consonants = filterChars(PATTERN_CONSONANTS, ex);
   if (!vowels.length || !consonants.length) return "";
   let word = "";
-  for (const ch of pat.toUpperCase()) {
+  for (const ch of pat) {
     if (ch === "V") word += vowels[Math.floor(Math.random() * vowels.length)];
     else if (ch === "C") word += consonants[Math.floor(Math.random() * consonants.length)];
+    else if (/[a-z]/.test(ch)) word += ch; // sabit harf
   }
   return word;
 }
 
 function generateFromPattern() {
-  const customPat = document.getElementById("patternCustom").value.trim().toUpperCase();
+  const rawCustomPat = document.getElementById("patternCustom").value.trim();
+  // C ve V büyük harf kalır, diğer harfler küçük kalır (sabit harf)
+  const customPat = rawCustomPat.replace(/[a-zA-Z]/g, ch => {
+    const up = ch.toUpperCase();
+    if (up === 'C' || up === 'V') return up;
+    return ch.toLowerCase();
+  });
   const count = Math.min(100000, Math.max(1, parseInt(document.getElementById("patternCount").value) || 100));
   const usePrefix = document.getElementById("patternPrefix").checked;
   const useSuffix = document.getElementById("patternSuffix").checked;
@@ -1250,10 +1257,10 @@ function generateFromPattern() {
   const suffix = useSuffix ? document.getElementById("suffixInput").value.trim().toLowerCase() : "";
 
   let patterns = [...selectedPatterns];
-  if (customPat && /^[CV]+$/.test(customPat)) {
+  if (customPat && /^[CVa-z]+$/.test(customPat) && /[CV]/.test(customPat)) {
     if (!patterns.includes(customPat)) patterns.push(customPat);
   }
-  if (!patterns.length) { alert("En az bir kalıp seçin veya özel kalıp girin (C ve V harfleri ile)"); return; }
+  if (!patterns.length) { alert("En az bir kalıp seçin veya özel kalıp girin (C=sessiz, V=sesli, küçük harf=sabit)"); return; }
 
   const names = new Set();
   const excluded = getExcludedChars();
